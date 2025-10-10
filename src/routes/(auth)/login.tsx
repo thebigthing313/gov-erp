@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { sessionExists } from '@/lib/auth'
+import { getUserId, sessionExists } from '@/lib/auth'
 import { useForm } from '@tanstack/react-form'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { Terminal } from 'lucide-react'
@@ -28,7 +28,8 @@ const loginFormSchema = z.object({
 export const Route = createFileRoute('/(auth)/login')({
   beforeLoad: async ({ context }) => {
     const isActiveSession = await sessionExists(context.supabase)
-    if (isActiveSession) {
+    const user_id = await getUserId(context.supabase)
+    if (isActiveSession && user_id) {
       throw redirect({
         to: '/',
       })
@@ -56,7 +57,7 @@ function RouteComponent() {
         password: value.password,
       })
 
-      if (loginError) throw setError(loginError.message)
+      if (loginError) setError(loginError.message)
 
       redirectTo ? navigate({ to: redirectTo }) : navigate({ to: '/' })
     },
@@ -88,7 +89,7 @@ function RouteComponent() {
                 form.handleSubmit()
               }}
             >
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
                 <form.Field
                   name="email"
                   children={(field) => {

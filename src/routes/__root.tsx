@@ -11,10 +11,12 @@ import type { MCMECSupabaseClient } from '@/lib/supabase'
 import { AlertTriangle, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/typography'
+import type { Company } from '@/data/company-data'
 
 interface MyRouterContext {
   queryClient: QueryClient
   supabase: MCMECSupabaseClient
+  company: Company
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

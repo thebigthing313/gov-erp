@@ -5,10 +5,15 @@ export const Route = createFileRoute('/(auth)')({
 })
 
 function RouteComponent() {
+  const { company } = Route.useRouteContext()
   return (
-    <div className="flex h-full w-full items-center justify-center p-6 md:p-10">
-      <div className="flex flex-col gap-2 w-full max-w-sm">
+    <div className="h-screen w-screen flex items-center justify-center">
+      <div className="flex flex-col items-center w-full max-w-sm">
         <Outlet />
+        <div className="flex flex-col items-center text-xs text-muted-foreground tracking-tight">
+          <span>{company.name}</span>
+          <span>{company.address}</span>
+        </div>
       </div>
     </div>
   )
