@@ -19,6 +19,7 @@ export function TextInput({
   return (
     <Field data-invalid={!!errors?.length}>
       <FieldLabel>{label}</FieldLabel>
+      {description && <FieldDescription>{description}</FieldDescription>}
       <InputGroup>
         <InputGroupInput
           {...props}
@@ -30,8 +31,10 @@ export function TextInput({
           </InputGroupAddon>
         )}
       </InputGroup>
-      <FieldDescription>{description}</FieldDescription>
-      <FieldError errors={errors} />
+
+      {errors && errors.length > 0 && (
+        <FieldError className="text-xs" errors={errors} />
+      )}
     </Field>
   )
 }

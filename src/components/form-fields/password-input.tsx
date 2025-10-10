@@ -22,9 +22,11 @@ export function PasswordInput({
 
   return (
     <Field data-invalid={!!errors?.length}>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel htmlFor="password">{label}</FieldLabel>
+      {description && <FieldDescription>{description}</FieldDescription>}
       <InputGroup>
         <InputGroupInput
+          id="password"
           type={isPasswordVisible ? 'text' : 'password'}
           {...props}
           aria-invalid={!!errors?.length}
@@ -33,14 +35,16 @@ export function PasswordInput({
         <InputGroupAddon align="inline-end">
           <Button
             variant="ghost"
+            type="button"
             onClick={() => setIsPasswordVisible(!isPasswordVisible)}
           >
             {isPasswordVisible ? <EyeOff /> : <EyeIcon />}
           </Button>
         </InputGroupAddon>
       </InputGroup>
-      <FieldDescription>{description}</FieldDescription>
-      <FieldError errors={errors} />
+      {errors && errors.length > 0 && (
+        <FieldError className="text-xs" errors={errors} />
+      )}
     </Field>
   )
 }
