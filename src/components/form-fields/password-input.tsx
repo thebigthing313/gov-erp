@@ -1,14 +1,14 @@
 import { useState } from 'react'
+import { EyeIcon, EyeOff } from 'lucide-react'
 import { Field, FieldDescription, FieldError, FieldLabel } from '../ui/field'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
 import { Button } from '../ui/button'
-import { EyeIcon, EyeOff } from 'lucide-react'
 
 interface PasswordInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   description?: string
   isLoading?: boolean
-  errors?: ({ message?: string } | undefined)[]
+  errors?: Array<{ message?: string } | undefined>
   label?: string
 }
 

@@ -5,7 +5,7 @@ import { Spinner } from '../ui/spinner'
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   description?: string
   isLoading?: boolean
-  errors?: ({ message?: string } | undefined)[]
+  errors?: Array<{ message?: string } | undefined>
   label?: string
 }
 
