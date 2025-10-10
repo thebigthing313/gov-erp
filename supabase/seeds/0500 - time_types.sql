@@ -1,0 +1,17 @@
+INSERT INTO "public"."time_types" ("id", "created_at", "type_name", "type_short_name", "is_paid") VALUES
+	('685bdb02-2cb9-4428-9c02-365e5e738d98', '2025-09-25 15:35:17.76303+00', 'Regular', 'R', true),
+	('ff91ac92-fdd7-442b-96f3-5e7d2f5d0644', '2025-09-25 15:35:17.76303+00', 'Overtime (Paid)', 'OT/P', true),
+	('a425db7a-31dc-48ac-9e0e-09379e468c2f', '2025-09-25 15:35:17.76303+00', 'Overtime (CTO)', 'OT/C', false),
+	('28be0ab3-302a-4da9-8790-35d1dd7ea33d', '2025-09-25 15:35:17.76303+00', 'Holiday', 'H', true),
+	('e5eef754-da95-4bd7-a120-69186b4b25ad', '2025-09-25 15:35:17.76303+00', 'Sick', 'S', true),
+	('8ea7e2e8-d0e8-4ec5-92f9-517c5a197c52', '2025-09-25 15:35:17.76303+00', 'Vacation', 'V', true),
+	('9bc2d91a-89dc-4def-8aa8-10f670b68d35', '2025-09-25 15:35:17.76303+00', 'Personal', 'P', true),
+	('0127d2f4-acb3-45cf-b479-5171a8fc6975', '2025-09-25 15:35:17.76303+00', 'Compensatory Time Off', 'CTO', true),
+	('afec5911-b26f-4338-95ae-b1c28409b2f7', '2025-09-25 15:35:17.76303+00', 'Family and Medical Leave Act Leave', 'FMLA', false),
+	('8e713c43-a9b5-4081-9620-c9e5db29b703', '2025-09-25 15:35:17.76303+00', 'Work From Home', 'WFH', true),
+	('598aa9ff-4028-4799-86a0-aeda6d879581', '2025-09-25 15:35:17.76303+00', 'NJ Family Leave Act Leave', 'NJFLA', false),
+	('05de12f5-7e09-4860-bc8b-18d1e33b881f', '2025-09-25 15:35:17.76303+00', 'Jury Duty', 'JD', true),
+	('35c2a414-0f3f-419a-b589-10654f164a0a', '2025-09-25 15:35:17.76303+00', 'Bereavement Leave', 'BL', true),
+	('b9be0962-9a6f-4f1f-99d4-5b94a519078e', '2025-09-25 15:35:17.76303+00', 'Leave Without Pay', 'LWOP', false),
+	('1400bb29-9f86-4ce0-841a-80e2a5b69972', '2025-09-30 19:28:31.436183+00', 'Voluntary Furlough', 'VF', false),
+	('ff9898c4-f408-4ad1-9d75-7132ff31ebe8', '2025-09-30 19:31:23.560688+00', 'Military Leave', 'ML', true);
