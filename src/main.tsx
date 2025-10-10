@@ -11,6 +11,7 @@ import { routeTree } from './routeTree.gen'
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 import { TooltipProvider } from './components/ui/tooltip.tsx'
+import { company } from './data/company-data'
 
 // Create a new router instance
 
@@ -22,6 +23,7 @@ const router = createRouter({
   context: {
     ...TanStackQueryProviderContext,
     ...SupabaseProviderContext,
+    company,
   },
   defaultPreload: 'intent',
   scrollRestoration: true,
