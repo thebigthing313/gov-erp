@@ -21,5 +21,9 @@ export const Route = createFileRoute('/(app)')({
 })
 
 function RouteComponent() {
-  return <Outlet />
+  return (
+    <div className="w-screen h-screen flex items-center justify-center p-6">
+      <Outlet />
+    </div>
+  )
 }

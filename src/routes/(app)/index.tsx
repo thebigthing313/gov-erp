@@ -1,6 +1,8 @@
+import { Typography } from '@/components/typography'
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -25,16 +27,24 @@ function RouteComponent() {
   const { data } = useSuspenseQuery(employeeInfoQueryOptions(supabase, user_id))
 
   return (
-    <Card className="min-w-md max-w-lg mx-auto">
+    <Card className="min-w-sm max-w-xl w-full">
       <CardHeader>
-        <CardTitle>Hello, {data.first_name}</CardTitle>
+        <CardTitle>
+          <Typography tag="h2">Welcome, {data.first_name}!</Typography>
+        </CardTitle>
+        <CardDescription>
+          <Typography tag="muted">
+            Here are your applications. If you think you are missing access to a
+            specific app, let an admin know.
+          </Typography>
+        </CardDescription>
       </CardHeader>
       <CardContent>list apps here</CardContent>
-      <CardFooter className="grid gap-0">
-        <div className="text-xs">{company.name}</div>
-        <div className="text-xs">{company.address}</div>
-        <div className="text-xs">{company.phone}</div>
-        <div className="text-xs">{company.fax}</div>
+      <CardFooter className="grid text-xs text-muted-foreground tracking-tight">
+        <div>{company.name}</div>
+        <div>{company.address}</div>
+        <div>Phone: {company.phone}</div>
+        <div>Fax: {company.fax}</div>
       </CardFooter>
     </Card>
   )
