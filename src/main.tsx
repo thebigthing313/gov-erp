@@ -3,20 +3,25 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 
 import * as TanStackQueryProvider from './integrations/tanstack-query/root-provider.tsx'
+import * as SupabaseProvider from './integrations/supabase'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
+import { TooltipProvider } from './components/ui/tooltip.tsx'
 
 // Create a new router instance
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
+const SupabaseProviderContext = SupabaseProvider.getContext()
+
 const router = createRouter({
   routeTree,
   context: {
     ...TanStackQueryProviderContext,
+    ...SupabaseProviderContext,
   },
   defaultPreload: 'intent',
   scrollRestoration: true,
@@ -38,7 +43,9 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-        <RouterProvider router={router} />
+        <TooltipProvider>
+          <RouterProvider router={router} />
+        </TooltipProvider>
       </TanStackQueryProvider.Provider>
     </StrictMode>,
   )
