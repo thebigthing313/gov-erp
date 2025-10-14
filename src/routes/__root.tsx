@@ -12,6 +12,7 @@ import { AlertTriangle, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/typography'
 import type { Company } from '@/data/company-data'
+import { PendingComponent } from '@/components/pending-component'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -20,6 +21,7 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
+  pendingComponent: PendingComponent,
   errorComponent: RootErrorComponent,
   notFoundComponent: NotFoundComponent,
   component: () => (
