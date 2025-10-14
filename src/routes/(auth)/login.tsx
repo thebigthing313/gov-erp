@@ -9,9 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { getAuth, isAuthenticated } from '@/lib/auth'
 import { useForm } from '@tanstack/react-form'
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Terminal } from 'lucide-react'
 import { useState } from 'react'
 import z from 'zod'
@@ -26,10 +25,6 @@ const loginFormSchema = z.object({
 })
 
 export const Route = createFileRoute('/(auth)/login')({
-  beforeLoad: async ({ context }) => {
-    const auth = await getAuth(context.supabase)
-    if (isAuthenticated(auth) === true) throw redirect({ to: '/' })
-  },
   component: RouteComponent,
   validateSearch: loginSearchSchema,
 })
