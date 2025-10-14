@@ -7,6 +7,11 @@ export function createMCMECClient(
     supabaseUrl: string,
     anonKey: string,
 ): MCMECSupabaseClient {
-    const supabase = createClient<Database>(supabaseUrl, anonKey);
+    const supabase = createClient<Database>(supabaseUrl, anonKey, {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+        },
+    });
     return supabase;
 }
