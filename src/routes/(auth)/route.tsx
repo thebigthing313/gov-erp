@@ -1,11 +1,17 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { getAuth, isAuthenticated } from '@/lib/auth'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(auth)')({
+  beforeLoad: async ({ context }) => {
+    const auth = await getAuth(context.supabase)
+    if (isAuthenticated(auth) === true) throw redirect({ to: '/' })
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
   const { company } = Route.useRouteContext()
+
   return (
     <div className="h-screen w-screen flex items-center justify-center">
       <div className="flex flex-col items-center w-full max-w-sm">
