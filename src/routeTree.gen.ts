@@ -9,11 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TimesheetsRouteRouteImport } from './routes/timesheets/route'
+import { Route as EmployeePortalRouteRouteImport } from './routes/employee-portal/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as appRouteRouteImport } from './routes/(app)/route'
+import { Route as TimesheetsIndexRouteImport } from './routes/timesheets/index'
+import { Route as EmployeePortalIndexRouteImport } from './routes/employee-portal/index'
 import { Route as appIndexRouteImport } from './routes/(app)/index'
+import { Route as TimesheetsChangelogRouteImport } from './routes/timesheets/changelog'
+import { Route as EmployeePortalChangelogRouteImport } from './routes/employee-portal/changelog'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 
+const TimesheetsRouteRoute = TimesheetsRouteRouteImport.update({
+  id: '/timesheets',
+  path: '/timesheets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeePortalRouteRoute = EmployeePortalRouteRouteImport.update({
+  id: '/employee-portal',
+  path: '/employee-portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const authRouteRoute = authRouteRouteImport.update({
   id: '/(auth)',
   getParentRoute: () => rootRouteImport,
@@ -22,10 +38,30 @@ const appRouteRoute = appRouteRouteImport.update({
   id: '/(app)',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TimesheetsIndexRoute = TimesheetsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TimesheetsRouteRoute,
+} as any)
+const EmployeePortalIndexRoute = EmployeePortalIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EmployeePortalRouteRoute,
+} as any)
 const appIndexRoute = appIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => appRouteRoute,
+} as any)
+const TimesheetsChangelogRoute = TimesheetsChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => TimesheetsRouteRoute,
+} as any)
+const EmployeePortalChangelogRoute = EmployeePortalChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => EmployeePortalRouteRoute,
 } as any)
 const authLoginRoute = authLoginRouteImport.update({
   id: '/login',
@@ -35,34 +71,91 @@ const authLoginRoute = authLoginRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof appIndexRoute
+  '/employee-portal': typeof EmployeePortalRouteRouteWithChildren
+  '/timesheets': typeof TimesheetsRouteRouteWithChildren
   '/login': typeof authLoginRoute
+  '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
+  '/timesheets/changelog': typeof TimesheetsChangelogRoute
+  '/employee-portal/': typeof EmployeePortalIndexRoute
+  '/timesheets/': typeof TimesheetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof appIndexRoute
   '/login': typeof authLoginRoute
+  '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
+  '/timesheets/changelog': typeof TimesheetsChangelogRoute
+  '/employee-portal': typeof EmployeePortalIndexRoute
+  '/timesheets': typeof TimesheetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(app)': typeof appRouteRouteWithChildren
   '/(auth)': typeof authRouteRouteWithChildren
+  '/employee-portal': typeof EmployeePortalRouteRouteWithChildren
+  '/timesheets': typeof TimesheetsRouteRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
+  '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
+  '/timesheets/changelog': typeof TimesheetsChangelogRoute
   '/(app)/': typeof appIndexRoute
+  '/employee-portal/': typeof EmployeePortalIndexRoute
+  '/timesheets/': typeof TimesheetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login'
+  fullPaths:
+    | '/'
+    | '/employee-portal'
+    | '/timesheets'
+    | '/login'
+    | '/employee-portal/changelog'
+    | '/timesheets/changelog'
+    | '/employee-portal/'
+    | '/timesheets/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login'
-  id: '__root__' | '/(app)' | '/(auth)' | '/(auth)/login' | '/(app)/'
+  to:
+    | '/'
+    | '/login'
+    | '/employee-portal/changelog'
+    | '/timesheets/changelog'
+    | '/employee-portal'
+    | '/timesheets'
+  id:
+    | '__root__'
+    | '/(app)'
+    | '/(auth)'
+    | '/employee-portal'
+    | '/timesheets'
+    | '/(auth)/login'
+    | '/employee-portal/changelog'
+    | '/timesheets/changelog'
+    | '/(app)/'
+    | '/employee-portal/'
+    | '/timesheets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   appRouteRoute: typeof appRouteRouteWithChildren
   authRouteRoute: typeof authRouteRouteWithChildren
+  EmployeePortalRouteRoute: typeof EmployeePortalRouteRouteWithChildren
+  TimesheetsRouteRoute: typeof TimesheetsRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/timesheets': {
+      id: '/timesheets'
+      path: '/timesheets'
+      fullPath: '/timesheets'
+      preLoaderRoute: typeof TimesheetsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employee-portal': {
+      id: '/employee-portal'
+      path: '/employee-portal'
+      fullPath: '/employee-portal'
+      preLoaderRoute: typeof EmployeePortalRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(auth)': {
       id: '/(auth)'
       path: '/'
@@ -77,12 +170,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/timesheets/': {
+      id: '/timesheets/'
+      path: '/'
+      fullPath: '/timesheets/'
+      preLoaderRoute: typeof TimesheetsIndexRouteImport
+      parentRoute: typeof TimesheetsRouteRoute
+    }
+    '/employee-portal/': {
+      id: '/employee-portal/'
+      path: '/'
+      fullPath: '/employee-portal/'
+      preLoaderRoute: typeof EmployeePortalIndexRouteImport
+      parentRoute: typeof EmployeePortalRouteRoute
+    }
     '/(app)/': {
       id: '/(app)/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof appIndexRouteImport
       parentRoute: typeof appRouteRoute
+    }
+    '/timesheets/changelog': {
+      id: '/timesheets/changelog'
+      path: '/changelog'
+      fullPath: '/timesheets/changelog'
+      preLoaderRoute: typeof TimesheetsChangelogRouteImport
+      parentRoute: typeof TimesheetsRouteRoute
+    }
+    '/employee-portal/changelog': {
+      id: '/employee-portal/changelog'
+      path: '/changelog'
+      fullPath: '/employee-portal/changelog'
+      preLoaderRoute: typeof EmployeePortalChangelogRouteImport
+      parentRoute: typeof EmployeePortalRouteRoute
     }
     '/(auth)/login': {
       id: '/(auth)/login'
@@ -118,9 +239,38 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
 )
 
+interface EmployeePortalRouteRouteChildren {
+  EmployeePortalChangelogRoute: typeof EmployeePortalChangelogRoute
+  EmployeePortalIndexRoute: typeof EmployeePortalIndexRoute
+}
+
+const EmployeePortalRouteRouteChildren: EmployeePortalRouteRouteChildren = {
+  EmployeePortalChangelogRoute: EmployeePortalChangelogRoute,
+  EmployeePortalIndexRoute: EmployeePortalIndexRoute,
+}
+
+const EmployeePortalRouteRouteWithChildren =
+  EmployeePortalRouteRoute._addFileChildren(EmployeePortalRouteRouteChildren)
+
+interface TimesheetsRouteRouteChildren {
+  TimesheetsChangelogRoute: typeof TimesheetsChangelogRoute
+  TimesheetsIndexRoute: typeof TimesheetsIndexRoute
+}
+
+const TimesheetsRouteRouteChildren: TimesheetsRouteRouteChildren = {
+  TimesheetsChangelogRoute: TimesheetsChangelogRoute,
+  TimesheetsIndexRoute: TimesheetsIndexRoute,
+}
+
+const TimesheetsRouteRouteWithChildren = TimesheetsRouteRoute._addFileChildren(
+  TimesheetsRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   appRouteRoute: appRouteRouteWithChildren,
   authRouteRoute: authRouteRouteWithChildren,
+  EmployeePortalRouteRoute: EmployeePortalRouteRouteWithChildren,
+  TimesheetsRouteRoute: TimesheetsRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
