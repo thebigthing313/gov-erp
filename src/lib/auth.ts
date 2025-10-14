@@ -6,54 +6,55 @@ export type Permission =
     | "timesheet_functions"
     | "admin";
 
-export async function getUserId(
+export type Auth = {
+    userId: string;
+    employeeId: string;
+    permissions: (Permission | string)[];
+};
+
+export type NoAuth = {
+    userId: null;
+    employeeId: null;
+    permissions: [];
+};
+
+export async function getAuth(
     supabase: MCMECSupabaseClient,
-): Promise<string | null> {
-    const { data, error } = await supabase.auth.getClaims();
+): Promise<Auth | NoAuth> {
+    const nullAuth: NoAuth = {
+        userId: null,
+        employeeId: null,
+        permissions: [],
+    };
 
-    if (error) throw error;
-    if (!data) return null;
-
-    const userId = data.claims.sub;
-
-    return userId;
-}
-
-export async function getProfileId(
-    supabase: MCMECSupabaseClient,
-): Promise<string | null> {
-    const { data, error } = await supabase.auth.getClaims();
-
-    if (error) throw error;
-    if (!data) return null;
-
-    const profileId = data.claims.app_metadata?.profile_id || null;
-
-    return profileId;
-}
-
-export async function getPermissions(
-    supabase: MCMECSupabaseClient,
-): Promise<(Permission | string)[]> {
-    const { data, error } = await supabase.auth.getClaims();
-
-    if (error) throw error;
-    if (!data) return [];
-    const permissions = data.claims.app_metadata?.permissions || [];
-    return permissions;
-}
-
-export function hasPermission(
-    permissions: (Permission | string)[],
-    check: Permission,
-): boolean {
-    return permissions.includes(check);
-}
-
-export async function sessionExists(
-    supabase: MCMECSupabaseClient,
-): Promise<boolean> {
     const { data, error } = await supabase.auth.getSession();
     if (error) throw error;
-    return !!data;
+    if (!data.session) return nullAuth;
+
+    const { data: jwt, error: claimsError } = await supabase.auth.getClaims();
+    if (claimsError) throw claimsError;
+    if (!jwt) return nullAuth;
+
+    const auth = {
+        userId: jwt.claims.sub,
+        employeeId: jwt.claims.employee_id,
+        permissions: jwt.claims.permissions || [],
+    };
+
+    return auth;
+}
+
+export function hasPermission(auth: Auth, permission: Permission): boolean {
+    return auth.permissions.includes(permission);
+}
+
+export function isAuthenticated(auth: Auth | NoAuth): boolean {
+    return auth.userId !== null && auth.employeeId !== null;
+}
+
+export async function refreshSession(
+    supabase: MCMECSupabaseClient,
+): Promise<void> {
+    const { error } = await supabase.auth.refreshSession();
+    if (error) throw error;
 }
