@@ -1,18 +1,21 @@
 import { Typography } from '@/components/typography'
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { employeeInfoQueryOptions } from '@/queries/employees/query-options'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { AppCard } from '@/components/cards/app-card'
 import { appList } from '@/data/company-app-list'
 import { PendingComponent } from '@/components/pending-component'
+import { hasPermission, signOut } from '@/lib/auth'
 
 export const Route = createFileRoute('/(app)/')({
   pendingComponent: PendingComponent,
@@ -35,7 +38,7 @@ function RouteComponent() {
     <Card className="min-w-sm max-w-xl not-visited:w-full max-h-full flex flex-col">
       <CardHeader>
         <CardTitle>
-          <Typography tag="h2">Welcome, {data.first_name}!</Typography>
+          <Typography tag="h3">Welcome, {data.first_name}!</Typography>
         </CardTitle>
         <CardDescription>
           <Typography tag="muted">
@@ -43,12 +46,23 @@ function RouteComponent() {
             specific app, let an admin know.
           </Typography>
         </CardDescription>
+        <CardAction>
+          <Button
+            variant="link"
+            onClick={async () => {
+              await signOut(supabase)
+              navigate({ to: '/login' })
+            }}
+          >
+            Logout
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent className="overflow-y-auto flex-1">
         {appList.map((app) => {
           if (
             !app.requiredPermission ||
-            auth.permissions.includes(app.requiredPermission)
+            hasPermission(auth, app.requiredPermission)
           ) {
             return (
               <AppCard
