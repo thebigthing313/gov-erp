@@ -4,7 +4,11 @@ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 export const Route = createFileRoute('/(app)')({
   beforeLoad: async ({ context }) => {
     const auth = await getAuth(context.supabase)
-    if (isAuthenticated(auth) === false) redirect({ to: '/login' })
+
+    if (!isAuthenticated(auth)) {
+      throw redirect({ to: '/login' })
+    }
+
     return { auth: auth as Auth }
   },
   component: RouteComponent,
