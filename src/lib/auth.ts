@@ -35,10 +35,13 @@ export async function getAuth(
     if (claimsError) throw claimsError;
     if (!jwt) return nullAuth;
 
+    const employeeId = jwt.claims.app_metadata.employee_id;
+    if (!employeeId) return nullAuth; // Return NoAuth if no employeeId
+
     const auth = {
         userId: jwt.claims.sub,
-        employeeId: jwt.claims.employee_id,
-        permissions: jwt.claims.permissions || [],
+        employeeId: employeeId,
+        permissions: jwt.claims.app_metadata.permissions || [],
     };
 
     return auth;
@@ -56,5 +59,12 @@ export async function refreshSession(
     supabase: MCMECSupabaseClient,
 ): Promise<void> {
     const { error } = await supabase.auth.refreshSession();
+    if (error) throw error;
+}
+
+export async function signOut(
+    supabase: MCMECSupabaseClient,
+): Promise<void> {
+    const { error } = await supabase.auth.signOut();
     if (error) throw error;
 }
