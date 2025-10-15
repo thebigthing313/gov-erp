@@ -1,9 +1,11 @@
-create function public.decrypt_ssn(p_employee_id uuid)
-returns text
-language plpgsql
-security definer
-set search_path = ''
-as $$
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.decrypt_ssn(p_employee_id uuid)
+ RETURNS text
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 declare
     encryption_key text;
     encrypted_ssn text;
@@ -54,4 +56,7 @@ begin
 
     return decrypted_ssn;
 end
-$$;
+$function$
+;
+
+

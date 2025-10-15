@@ -1,12 +1,16 @@
-create function public.decrypt_ssn(p_employee_id uuid)
-returns text
-language plpgsql
-security definer
-set search_path = ''
-as $$
+drop function if exists "public"."decrypt_ssn"(p_data text);
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.decrypt_ssn(p_employee_id uuid)
+ RETURNS text
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 declare
     encryption_key text;
-    encrypted_ssn text;
+    ssn_hash text;
     decrypted_ssn text;
     current_role_name text;
 begin
@@ -40,18 +44,21 @@ begin
 
     -- Pull the encrypted SSN hash for the specified employee
     select ssn_hash
-    into encrypted_ssn
+    into ssn_hash
     from public.employees
     where id = p_employee_id
     limit 1;
 
-    if encrypted_ssn is null then
+    if ssn_hash is null then
         raise exception 'Employee not found or SSN not available for employee ID: %', p_employee_id;
     end if;
 
     -- Decrypt the SSN
-    decrypted_ssn := extensions.pgp_sym_decrypt(encrypted_ssn::bytea, encryption_key);
+    decrypted_ssn := extensions.pgp_sym_decrypt(ssn_hash::bytea, encryption_key);
 
     return decrypted_ssn;
 end
-$$;
+$function$
+;
+
+
