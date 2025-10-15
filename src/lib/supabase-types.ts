@@ -467,7 +467,7 @@ export type Database = {
     }
     Functions: {
       decrypt_ssn: {
-        Args: { p_data: string }
+        Args: { p_employee_id: string }
         Returns: string
       }
       employee_user_id: {
