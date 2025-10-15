@@ -12,6 +12,7 @@ import {
 } from '@/queries/employees/query-options'
 
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { EmployeePortalSidebarContent } from './-components/sidebar-content'
 
 export const Route = createFileRoute('/employee-portal')({
   beforeLoad: async () => {
@@ -37,7 +38,7 @@ function RouteComponent() {
   return (
     <SidebarProvider>
       <SharedLayoutSidebar user_id={auth.userId}>
-        SIDEBARCONTENT
+        <EmployeePortalSidebarContent />
       </SharedLayoutSidebar>
       <SidebarInset>
         <SharedLayoutHeader>
