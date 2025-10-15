@@ -1,9 +1,47 @@
-import { createFileRoute } from '@tanstack/react-router'
+import {
+  SharedLayoutHeader,
+  SharedLayoutOutlet,
+  SharedLayoutSidebar,
+} from '@/components/layout/shared-layout'
+import { Typography } from '@/components/typography'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Auth, getAuth, hasPermission, isAuthenticated } from '@/lib/auth'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/timesheets')({
+  beforeLoad: async () => {
+    const auth = await getAuth()
+
+    if (!isAuthenticated(auth)) {
+      throw redirect({ to: '/login' })
+    }
+
+    if (!hasPermission(auth as Auth, 'timesheet_functions')) {
+      throw new Error(
+        'You are unauthorized to view this page. If you think this is an error, please contact your administrator.',
+      )
+    }
+
+    return { auth: auth as Auth }
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  return <div>Hello "/timesheets"!</div>
+  const { auth } = Route.useRouteContext()
+  return (
+    <SidebarProvider>
+      <SharedLayoutSidebar user_id={auth.userId}>
+        SIDEBARCONTENT
+      </SharedLayoutSidebar>
+      <SidebarInset>
+        <SharedLayoutHeader>
+          <Typography tag="h4">Timesheet Program</Typography>
+        </SharedLayoutHeader>
+        <SharedLayoutOutlet>
+          <Outlet />
+        </SharedLayoutOutlet>
+      </SidebarInset>
+    </SidebarProvider>
+  )
 }
