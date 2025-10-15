@@ -1,12 +1,12 @@
-import { MCMECSupabaseClient } from '@/db/client';
-import { Row } from '@/db/data-types';
-import { Prettify } from '@repo/utils';
+import { supabase } from "@/main";
+import { Row } from "@/lib/data-types";
+import { Prettify } from "@/lib/utils";
 
-type PayPeriod = Row<'pay_periods'>;
-type Timesheet = Row<'timesheets'>;
-type TimesheetEmployee = Row<'timesheet_employees'>;
-type TimesheetEmployeeTime = Row<'timesheet_employee_times'>;
-type TimeType = Row<'time_types'>;
+type PayPeriod = Row<"pay_periods">;
+type Timesheet = Row<"timesheets">;
+type TimesheetEmployee = Row<"timesheet_employees">;
+type TimesheetEmployeeTime = Row<"timesheet_employee_times">;
+type TimeType = Row<"time_types">;
 
 type EmployeePayPeriodRecord = Prettify<
   PayPeriod & {
@@ -27,14 +27,13 @@ type EmployeePayPeriodRecord = Prettify<
 >;
 
 export async function fetchPayPeriodsByYear(
-  supabase: MCMECSupabaseClient,
-  payrollYear: number
+  payrollYear: number,
 ): Promise<PayPeriod[]> {
   const { data, error } = await supabase
-    .from('pay_periods')
-    .select('*')
-    .eq('payroll_year', payrollYear)
-    .order('pay_period_number', { ascending: true });
+    .from("pay_periods")
+    .select("*")
+    .eq("payroll_year", payrollYear)
+    .order("pay_period_number", { ascending: true });
 
   if (error) throw error;
 
@@ -42,13 +41,12 @@ export async function fetchPayPeriodsByYear(
 }
 
 export async function fetchPayPeriodById(
-  supabase: MCMECSupabaseClient,
-  id: string
+  id: string,
 ): Promise<PayPeriod> {
   const { data, error } = await supabase
-    .from('pay_periods')
-    .select('*')
-    .eq('id', id)
+    .from("pay_periods")
+    .select("*")
+    .eq("id", id)
     .single();
 
   if (error) throw error;
@@ -57,18 +55,17 @@ export async function fetchPayPeriodById(
 }
 
 export async function fetchPayPeriodByYearAndEmployee(
-  supabase: MCMECSupabaseClient,
   payrollYear: number,
-  employeeId: string
+  employeeId: string,
 ): Promise<EmployeePayPeriodRecord[] | null> {
   const { data, error } = await supabase
-    .from('pay_periods')
+    .from("pay_periods")
     .select(
-      '*,timesheets(*,timesheet_employees(*,timesheet_employee_times(*,time_types(*))))'
+      "*,timesheets(*,timesheet_employees(*,timesheet_employee_times(*,time_types(*))))",
     )
-    .eq('payroll_year', payrollYear)
-    .eq('timesheets.timesheet_employees.employee_id', employeeId)
-    .order('pay_period_number', { ascending: true });
+    .eq("payroll_year", payrollYear)
+    .eq("timesheets.timesheet_employees.employee_id", employeeId)
+    .order("pay_period_number", { ascending: true });
 
   if (error) throw error;
 

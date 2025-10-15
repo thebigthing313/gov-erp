@@ -1,13 +1,12 @@
 import type { Prettify } from "@/lib/utils";
-import type { MCMECSupabaseClient } from "@/lib/supabase";
 import type { Row } from "@/lib/data-types";
+import { supabase } from "@/main";
 
 type Employee = Row<"employees">;
 type EmployeeTitle = Prettify<Row<"employee_titles"> & { titles: Title }>;
 type Title = Row<"titles">;
 
 export async function fetchEmployeeInfoByUserId(
-  supabase: MCMECSupabaseClient,
   userId: string,
 ): Promise<Employee> {
   const { data, error } = await supabase
@@ -22,7 +21,6 @@ export async function fetchEmployeeInfoByUserId(
 }
 
 export async function fetchEmployeeTitlesByUserId(
-  supabase: MCMECSupabaseClient,
   userId: string,
 ): Promise<EmployeeTitle[]> {
   const { data, error } = await supabase
