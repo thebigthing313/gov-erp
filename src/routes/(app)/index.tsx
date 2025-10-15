@@ -16,6 +16,7 @@ import { AppCard } from '@/components/cards/app-card'
 import { appList } from '@/data/company-app-list'
 
 import { hasPermission, signOut } from '@/lib/auth'
+import { parsePhoneNumberWithError } from 'libphonenumber-js'
 
 export const Route = createFileRoute('/(app)/')({
   component: RouteComponent,
@@ -25,6 +26,12 @@ function RouteComponent() {
   const { company, auth } = Route.useRouteContext()
   const { data } = useSuspenseQuery(employeeInfoQueryOptions(auth.userId))
   const navigate = useNavigate()
+  const parsedPhone = parsePhoneNumberWithError(company.phone, {
+    defaultCountry: 'US',
+  })
+  const parsedFax = parsePhoneNumberWithError(company.fax, {
+    defaultCountry: 'US',
+  })
 
   return (
     <Card className="min-w-sm max-w-xl not-visited:w-full max-h-full flex flex-col">
@@ -74,8 +81,8 @@ function RouteComponent() {
       <CardFooter className="grid text-xs text-muted-foreground tracking-tight">
         <div>{company.name}</div>
         <div>{company.address}</div>
-        <div>Phone: {company.phone}</div>
-        <div>Fax: {company.fax}</div>
+        <div>Phone: {parsedPhone.formatNational()}</div>
+        <div>Fax: {parsedFax.formatNational()}</div>
       </CardFooter>
     </Card>
   )
