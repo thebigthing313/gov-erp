@@ -1,4 +1,4 @@
-import type { MCMECSupabaseClient } from "./supabase";
+import { supabase } from "@/main";
 
 export type Permission =
     | "manage_permissions"
@@ -18,9 +18,7 @@ export type NoAuth = {
     permissions: [];
 };
 
-export async function getAuth(
-    supabase: MCMECSupabaseClient,
-): Promise<Auth | NoAuth> {
+export async function getAuth(): Promise<Auth | NoAuth> {
     const nullAuth: NoAuth = {
         userId: null,
         employeeId: null,
@@ -55,16 +53,12 @@ export function isAuthenticated(auth: Auth | NoAuth): boolean {
     return auth.userId !== null && auth.employeeId !== null;
 }
 
-export async function refreshSession(
-    supabase: MCMECSupabaseClient,
-): Promise<void> {
+export async function refreshSession(): Promise<void> {
     const { error } = await supabase.auth.refreshSession();
     if (error) throw error;
 }
 
-export async function signOut(
-    supabase: MCMECSupabaseClient,
-): Promise<void> {
+export async function signOut(): Promise<void> {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
 }
