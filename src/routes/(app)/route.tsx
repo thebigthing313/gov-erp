@@ -1,9 +1,11 @@
+import { PendingComponent } from '@/components/pending-component'
 import { getAuth, isAuthenticated, Auth } from '@/lib/auth'
+import { employeeInfoQueryOptions } from '@/queries/employees/query-options'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)')({
-  beforeLoad: async ({ context }) => {
-    const auth = await getAuth(context.supabase)
+  beforeLoad: async () => {
+    const auth = await getAuth()
 
     if (!isAuthenticated(auth)) {
       throw redirect({ to: '/login' })
@@ -12,7 +14,12 @@ export const Route = createFileRoute('/(app)')({
     return { auth: auth as Auth }
   },
   component: RouteComponent,
-  loader: async () => {},
+  pendingComponent: PendingComponent,
+  loader: async ({ context }) => {
+    context.queryClient.ensureQueryData(
+      employeeInfoQueryOptions(context.auth.userId),
+    )
+  },
 })
 
 function RouteComponent() {
