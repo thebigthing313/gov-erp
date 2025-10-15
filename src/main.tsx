@@ -27,10 +27,10 @@ const router = createRouter({
     supabase,
     company,
   },
-  defaultPreload: 'intent',
+  // defaultPreload: 'intent',
   scrollRestoration: true,
   defaultStructuralSharing: true,
-  defaultPreloadStaleTime: 0,
+  // defaultPreloadStaleTime: 0,
 })
 
 // Register the router instance for type safety
