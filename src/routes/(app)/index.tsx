@@ -14,24 +14,16 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { AppCard } from '@/components/cards/app-card'
 import { appList } from '@/data/company-app-list'
-import { PendingComponent } from '@/components/pending-component'
+
 import { hasPermission, signOut } from '@/lib/auth'
 
 export const Route = createFileRoute('/(app)/')({
-  pendingComponent: PendingComponent,
   component: RouteComponent,
-  loader: async ({ context }) => {
-    context.queryClient.ensureQueryData(
-      employeeInfoQueryOptions(context.supabase, context.auth.userId),
-    )
-  },
 })
 
 function RouteComponent() {
-  const { supabase, company, auth } = Route.useRouteContext()
-  const { data } = useSuspenseQuery(
-    employeeInfoQueryOptions(supabase, auth.userId),
-  )
+  const { company, auth } = Route.useRouteContext()
+  const { data } = useSuspenseQuery(employeeInfoQueryOptions(auth.userId))
   const navigate = useNavigate()
 
   return (
@@ -50,7 +42,7 @@ function RouteComponent() {
           <Button
             variant="link"
             onClick={async () => {
-              await signOut(supabase)
+              await signOut()
               navigate({ to: '/login' })
             }}
           >
