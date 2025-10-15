@@ -17,6 +17,7 @@ import { Route as TimesheetsIndexRouteImport } from './routes/timesheets/index'
 import { Route as EmployeePortalIndexRouteImport } from './routes/employee-portal/index'
 import { Route as appIndexRouteImport } from './routes/(app)/index'
 import { Route as TimesheetsChangelogRouteImport } from './routes/timesheets/changelog'
+import { Route as EmployeePortalProfileRouteImport } from './routes/employee-portal/profile'
 import { Route as EmployeePortalChangelogRouteImport } from './routes/employee-portal/changelog'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 
@@ -58,6 +59,11 @@ const TimesheetsChangelogRoute = TimesheetsChangelogRouteImport.update({
   path: '/changelog',
   getParentRoute: () => TimesheetsRouteRoute,
 } as any)
+const EmployeePortalProfileRoute = EmployeePortalProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => EmployeePortalRouteRoute,
+} as any)
 const EmployeePortalChangelogRoute = EmployeePortalChangelogRouteImport.update({
   id: '/changelog',
   path: '/changelog',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/timesheets': typeof TimesheetsRouteRouteWithChildren
   '/login': typeof authLoginRoute
   '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
+  '/employee-portal/profile': typeof EmployeePortalProfileRoute
   '/timesheets/changelog': typeof TimesheetsChangelogRoute
   '/employee-portal/': typeof EmployeePortalIndexRoute
   '/timesheets/': typeof TimesheetsIndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/': typeof appIndexRoute
   '/login': typeof authLoginRoute
   '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
+  '/employee-portal/profile': typeof EmployeePortalProfileRoute
   '/timesheets/changelog': typeof TimesheetsChangelogRoute
   '/employee-portal': typeof EmployeePortalIndexRoute
   '/timesheets': typeof TimesheetsIndexRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/timesheets': typeof TimesheetsRouteRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
   '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
+  '/employee-portal/profile': typeof EmployeePortalProfileRoute
   '/timesheets/changelog': typeof TimesheetsChangelogRoute
   '/(app)/': typeof appIndexRoute
   '/employee-portal/': typeof EmployeePortalIndexRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/timesheets'
     | '/login'
     | '/employee-portal/changelog'
+    | '/employee-portal/profile'
     | '/timesheets/changelog'
     | '/employee-portal/'
     | '/timesheets/'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/employee-portal/changelog'
+    | '/employee-portal/profile'
     | '/timesheets/changelog'
     | '/employee-portal'
     | '/timesheets'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/timesheets'
     | '/(auth)/login'
     | '/employee-portal/changelog'
+    | '/employee-portal/profile'
     | '/timesheets/changelog'
     | '/(app)/'
     | '/employee-portal/'
@@ -198,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TimesheetsChangelogRouteImport
       parentRoute: typeof TimesheetsRouteRoute
     }
+    '/employee-portal/profile': {
+      id: '/employee-portal/profile'
+      path: '/profile'
+      fullPath: '/employee-portal/profile'
+      preLoaderRoute: typeof EmployeePortalProfileRouteImport
+      parentRoute: typeof EmployeePortalRouteRoute
+    }
     '/employee-portal/changelog': {
       id: '/employee-portal/changelog'
       path: '/changelog'
@@ -241,11 +260,13 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 interface EmployeePortalRouteRouteChildren {
   EmployeePortalChangelogRoute: typeof EmployeePortalChangelogRoute
+  EmployeePortalProfileRoute: typeof EmployeePortalProfileRoute
   EmployeePortalIndexRoute: typeof EmployeePortalIndexRoute
 }
 
 const EmployeePortalRouteRouteChildren: EmployeePortalRouteRouteChildren = {
   EmployeePortalChangelogRoute: EmployeePortalChangelogRoute,
+  EmployeePortalProfileRoute: EmployeePortalProfileRoute,
   EmployeePortalIndexRoute: EmployeePortalIndexRoute,
 }
 
