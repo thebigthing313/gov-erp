@@ -1,6 +1,7 @@
-INSERT INTO "public"."employees" ("id", "created_at", "user_id", "first_name", "last_name", "birth_date", "cell_phone", "home_address", "home_phone", "mailing_address", "modified_at", "ssn_hash", "photo_url", "csc_id", "pers_membership_number", "pers_tier", "email_address", "middle_name", "is_default_cto") VALUES
+WITH seed_rows(id, created_at, user_id, first_name, last_name, birth_date, cell_phone, home_address, home_phone, mailing_address, modified_at, ssn_cipher, photo_url, csc_id, pers_membership_number, pers_tier, email_address, middle_name, is_default_cto) AS (
+VALUES
 	('bc6aa0df-7766-4a73-99a4-9591cff6d818', '2025-09-25 18:39:11.384929+00', '125917f6-6740-4d88-bf35-d738a656f161', 'Adrian', 'Kabigting', '1991-03-13', '9083448455', '2651 Burns Pl, Union, NJ 07083', NULL, NULL, '2025-09-25 20:43:56.303657+00', '\xc30d04070302ba6f4d17995c10376cd23c01aabbc064622df506bc5db8df15ac7c815078a3b352f8ee1b44debb89b22108ee4352460e1a0a0e1532470440c4ed2d4f85c86f4ad38fcd35263c6f', NULL, '000738887', '2-1441557', '5', 'akabigting@gmail.com', 'Astorga', false),
-	('1dbf3606-7fa8-47fb-97e8-bd815820c71d', '2025-09-25 18:39:11.384929+00', NULL, 'Aaron', 'Smith', '1993-03-06', '7325705818', '12 Purdue Rd, Parlin NJ 08859', '7329525506', NULL, '2025-09-25 18:39:11.384929+00', '\xc30d040703026f994723b6dbf2de64d23501170e4a6a4f6405af1043a193ea24bfa1704bf20f761b4032ed541474cb0ddaf939102ac59db9db2f1d3531e1af0fce5f53728995', NULL, NULL, NULL, NULL, NULL, NULL, false),
+    ('1dbf3606-7fa8-47fb-97e8-bd815820c71d', '2025-09-25 18:39:11.384929+00', NULL, 'Aaron', 'Smith', '1993-03-06', '7325705818', '12 Purdue Rd, Parlin NJ 08859', '7329525506', NULL, '2025-09-25 18:39:11.384929+00', '\xc30d040703026f994723b6dbf2de64d23501170e4a6a4f6405af1043a193ea24bfa1704bf20f761b4032ed541474cb0ddaf939102ac59db9db2f1d3531e1af0fce5f53728995', NULL, NULL, NULL, NULL, NULL, NULL, false),
 	('f0a10b07-fa86-43e4-be66-08f2a1036807', '2025-09-25 18:39:11.384929+00', NULL, 'Alexander', 'Algaba', '1994-11-18', '9084211448', '8 Lake Avenue, Unit 2A, East Brunswick NJ 08816', NULL, NULL, '2025-09-25 18:39:11.384929+00', '\xc30d04070302b3672e0678a52a9e64d23c01d65d789d6d64bf9d05d66de2196a6429e6a0f9d98d5a681c56df20a0cd59929b22679675c5beb8ac1a9b6e860eb86e59ac29f24f78370dd35420ad', NULL, '000788414', '2-1485142', '5', 'alexanderalgaba94@outlook.com', NULL, false),
 	('ea55132f-84eb-44ac-a5ca-5a63e4f95c26', '2025-09-25 18:39:11.384929+00', NULL, 'Anahi', 'Munoz', '1998-11-19', '8628992562', '47 Wellington St, Fl 1, Clifton NJ 07011', NULL, NULL, '2025-09-25 18:39:11.384929+00', '\xc30d0407030294edba3973f601cc6dd235011c5c4408cb19a249539201b3cda832ed3481040b532070502610706ba7bbee65c20102c6726e091bd838338c0d4a1b03d9877ae2', NULL, NULL, NULL, NULL, NULL, NULL, false),
 	('4d3e2f62-e4f1-4fe3-968f-ea143579cffb', '2025-09-25 18:39:11.384929+00', NULL, 'Angello', 'Guerra', '1981-05-23', '8624528337', '10B Reynolds Ave, East Newark NJ 07029-', NULL, NULL, '2025-09-25 18:39:11.384929+00', '\xc30d04070302187b1400ee63f5f574d23c014a0c05fc42273c45d17effc68a97c98a8ef91ece30f3884da5ca9cb0951e1a65d81acbef16ad257ca1965c7f8bc83e92b8da33fbc45d0ef9a774ef', NULL, '000861348', '2-1578502', '5', 'angello.guerra5@gmail.com', NULL, false),
@@ -97,4 +98,29 @@ INSERT INTO "public"."employees" ("id", "created_at", "user_id", "first_name", "
 	('1d125aa8-fe45-4748-9b99-cb636199b95c', '2025-09-25 18:39:11.384929+00', NULL, 'William', 'Evegan', '1963-04-30', '7326919922', '95 Laurelwood Rd, Brick NJ 08724-', '7322060455', NULL, '2025-09-25 18:39:11.384929+00', '\xc30d0407030237be95cd35b9bbd463d23c010ecd503f0b4a59dc9d6c1cf7ffdf450ab82482353ae4c5b5dbe5ca3b9ea2ce929f3729c3db03a0f6f22cbd52e0a1876b34215e1ed89805fdc0a4a3', NULL, '000010039', '2-701965', '1', NULL, NULL, false),
 	('fc1d90c1-80ba-4ec5-8259-39bfdfe753bd', '2025-09-25 18:39:11.384929+00', NULL, 'William', 'Lynch II', '1984-12-11', '9083308270', '1030 Grove Ave Apt 26J, Edison NJ 08820-1538', NULL, NULL, '2025-09-25 18:39:11.384929+00', '\xc30d0407030248efa050059092bc65d23c01de4bfa9fcdfa1b8d49240a976aa6325ec559bfe6c343a28f7816428d58f6fd16bc0585df7966e638585320320252e57fd8c6d34cdbcd1fa97c6a7b', NULL, '000878326', '2-1601749', '5', 'fball121110@gmail.com', 'Dennis', false),
 	('aaa8e258-55a6-4301-9ba9-df5eb7d4e48b', '2025-09-25 18:39:11.384929+00', NULL, 'William', 'Walsh', '1996-02-18', '7322618176', '2515 Linden Ave, South Plainfield NJ 07080', '9087550959', NULL, '2025-09-25 18:39:11.384929+00', '\xc30d04070302f41948f77a89e3e669d23501fecabacd0ee63cec8686c43bb1d24a80875d7633d6878a0bcc76af3bc2783c07c44725089411bcb363391ef10d914efe42bfb9b8', NULL, NULL, NULL, NULL, NULL, 'James', false),
-	('1456bbb1-a1bf-419f-a7e1-210bfa287ead', '2025-09-25 18:39:11.384929+00', NULL, 'Zachary', 'Henry', '1994-06-16', '7326104295', '31 Appletree Ln Apt B, Old Bridge NJ 08857-', NULL, NULL, '2025-09-25 18:39:11.384929+00', '\xc30d04070302a24d34adbc7b736068d23c0163354bc395f3825b838ea029ef93f2d61dbd25d3ffbe950a19d333a5f43fc42fbb114756e1cd5ab1cd28d77e2764153a733409637f42d0cd795ba8', NULL, '000814244', '2-1511701', '5', 'zacharydrewhenry@gmail.com', 'Andrew', false);
+		('1456bbb1-a1bf-419f-a7e1-210bfa287ead', '2025-09-25 18:39:11.384929+00', NULL, 'Zachary', 'Henry', '1994-06-16', '7326104295', '31 Appletree Ln Apt B, Old Bridge NJ 08857-', NULL, NULL, '2025-09-25 18:39:11.384929+00', '\xc30d04070302a24d34adbc7b736068d23c0163354bc395f3825b838ea029ef93f2d61dbd25d3ffbe950a19d333a5f43fc42fbb114756e1cd5ab1cd28d77e2764153a733409637f42d0cd795ba8', NULL, '000814244', '2-1511701', '5', 'zacharydrewhenry@gmail.com', 'Andrew', false)
+)
+
+INSERT INTO "public"."employees" ("id", "created_at", "user_id", "first_name", "last_name", "birth_date", "cell_phone", "home_address", "home_phone", "mailing_address", "modified_at", "ssn_hash", "photo_url", "csc_id", "pers_membership_number", "pers_tier", "email_address", "middle_name", "is_default_cto")
+SELECT
+	id::uuid,
+	created_at::timestamptz,
+	user_id::uuid,
+	first_name,
+	last_name,
+	birth_date::date,
+	cell_phone,
+	home_address,
+	home_phone,
+	mailing_address,
+	modified_at::timestamptz,
+	-- Decrypt the provided cipher bytea so the table trigger sees plaintext
+	extensions.pgp_sym_decrypt(seed_rows.ssn_cipher::bytea, (SELECT vault.decrypted_secrets.decrypted_secret FROM vault.decrypted_secrets WHERE vault.decrypted_secrets.name = 'ssn_key' LIMIT 1)),
+	photo_url,
+	csc_id,
+	pers_membership_number,
+	pers_tier::integer,
+	email_address,
+	middle_name,
+	is_default_cto::boolean
+FROM seed_rows;
