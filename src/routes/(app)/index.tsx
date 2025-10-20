@@ -9,14 +9,13 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { employeeInfoQueryOptions } from '@/queries/employees/query-options'
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { AppCard } from '@/components/cards/app-card'
 import { appList } from '@/data/company-app-list'
 
 import { hasPermission, signOut } from '@/lib/auth'
-import { parsePhoneNumberWithError } from 'libphonenumber-js'
+import { parsePhoneNumberWithError } from 'libphonenumber-js/min'
+import { useEmployee } from '@/db/hooks/use-employee'
 
 export const Route = createFileRoute('/(app)/')({
   component: RouteComponent,
@@ -24,7 +23,9 @@ export const Route = createFileRoute('/(app)/')({
 
 function RouteComponent() {
   const { company, auth } = Route.useRouteContext()
-  const { data } = useSuspenseQuery(employeeInfoQueryOptions(auth.userId))
+  const { query } = useEmployee(auth.employeeId)
+  const employee = query.data[0]
+
   const navigate = useNavigate()
   const parsedPhone = parsePhoneNumberWithError(company.phone, {
     defaultCountry: 'US',
@@ -37,7 +38,7 @@ function RouteComponent() {
     <Card className="min-w-sm max-w-xl not-visited:w-full max-h-full flex flex-col">
       <CardHeader>
         <CardTitle>
-          <Typography tag="h3">Welcome, {data.first_name}!</Typography>
+          <Typography tag="h3">Welcome, {employee.first_name}!</Typography>
         </CardTitle>
         <CardDescription>
           <Typography tag="muted">
