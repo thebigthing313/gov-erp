@@ -50,7 +50,7 @@ export function hasPermission(auth: Auth, permission: Permission): boolean {
 }
 
 export function isAuthenticated(auth: Auth | NoAuth): boolean {
-    return auth.userId !== null && auth.employeeId !== null;
+    return auth.userId != null && auth.employeeId != null;
 }
 
 export async function refreshSession(): Promise<void> {
