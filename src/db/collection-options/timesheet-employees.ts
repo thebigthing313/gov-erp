@@ -2,7 +2,11 @@ import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provi
 import { Table } from "@/lib/data-types";
 import { supabase } from "@/main";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
-import { dbDelete, dbInsert, dbUpdate } from "../db-functions";
+import {
+    collectionOnDelete,
+    collectionOnInsert,
+    collectionOnUpdate,
+} from "../collection-functions";
 
 const { queryClient } = TanstackQueryProvider.getContext();
 
@@ -25,28 +29,9 @@ export const TimesheetEmployeesByEmployeeYearCollectionOptions = (
     },
     queryClient,
     getKey: (item) => item.id,
-    onInsert: async ({ transaction, collection }) => {
-        const localNewItems = transaction.mutations.map((m) => m.modified);
-        const serverNewItems = await dbInsert(table, localNewItems);
-
-        serverNewItems.forEach((item) => collection.utils.writeUpsert(item));
-        return { refetch: false };
-    },
-    onUpdate: async ({ transaction, collection }) => {
-        const localUpdatedItems = transaction.mutations.map((m) => ({
-            id: m.key,
-            changes: m.changes,
-        }));
-        const serverUpdatedItems = await dbUpdate(table, localUpdatedItems);
-
-        serverUpdatedItems.forEach((item) => {
-            collection.utils.writeUpsert(item);
-        });
-        return { refetch: false };
-    },
-    onDelete: async ({ transaction }) => {
-        const localDeletedItemIds = transaction.mutations.map((m) => m.key);
-        await dbDelete(table, localDeletedItemIds);
-        return { refetch: false };
-    },
+    onInsert: ({ transaction, collection }) =>
+        collectionOnInsert(table, transaction, collection),
+    onUpdate: ({ transaction, collection }) =>
+        collectionOnUpdate(table, transaction, collection),
+    onDelete: ({ transaction }) => collectionOnDelete(table, transaction),
 });
