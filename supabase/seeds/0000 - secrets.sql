@@ -1,1 +1,0 @@
-select vault.create_secret('01997206-159b-773b-886a-ec03e09ec5c6', 'ssn_key', 'For decryption edge function.');
