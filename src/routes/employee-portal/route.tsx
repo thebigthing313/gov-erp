@@ -8,7 +8,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Auth, getAuth, isAuthenticated } from '@/lib/auth'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { EmployeePortalSidebarContent } from './-components/sidebar-content'
-import { employeesCollection } from '@/db/collections'
+import { employeesCollection, titlesCollection } from '@/db/collections'
 import { getEmployeeTitlesCollection } from '@/db/factories/employee-titles'
 
 export const Route = createFileRoute('/employee-portal')({
@@ -28,6 +28,7 @@ export const Route = createFileRoute('/employee-portal')({
     )
     await employeesCollection.preload()
     await employeeTitlesCollection.preload()
+    await titlesCollection.preload()
   },
 })
 
