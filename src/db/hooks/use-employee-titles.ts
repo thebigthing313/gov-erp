@@ -10,7 +10,7 @@ export function useEmployeeTitles(employee_id: string) {
             ({ employee_titles, titles }) =>
                 eq(employee_titles.title_id, titles.id),
         ).where(({ employee_titles }) =>
-            employee_titles.employee_id === employee_id
+            eq(employee_titles.employee_id, employee_id)
         ).orderBy(({ employee_titles }) => employee_titles.start_date, "desc")
     );
 
