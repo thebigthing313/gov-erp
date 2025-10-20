@@ -31,7 +31,7 @@ function RouteComponent() {
   const { auth } = Route.useRouteContext()
   return (
     <SidebarProvider>
-      <SharedLayoutSidebar user_id={auth.userId}>
+      <SharedLayoutSidebar employee_id={auth.employeeId}>
         SIDEBARCONTENT
       </SharedLayoutSidebar>
       <SidebarInset>
