@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/typography'
 import type { Company } from '@/data/company-data'
 import { PendingComponent } from '@/components/pending-component'
+import { Toaster } from '@/components/ui/sonner'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -27,6 +28,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
       <Outlet />
+      <Toaster />
       <TanStackDevtools
         config={{
           position: 'bottom-right',
