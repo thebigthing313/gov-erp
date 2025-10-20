@@ -6,13 +6,10 @@ import {
 import { Typography } from '@/components/typography'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Auth, getAuth, isAuthenticated } from '@/lib/auth'
-import {
-  employeeInfoQueryOptions,
-  employeeTitlesByUserIdQueryOptions,
-} from '@/queries/employees/query-options'
-
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { EmployeePortalSidebarContent } from './-components/sidebar-content'
+import { employeesCollection } from '@/db/collections'
+import { getEmployeeTitlesCollection } from '@/db/factories/employee-titles'
 
 export const Route = createFileRoute('/employee-portal')({
   beforeLoad: async () => {
@@ -26,9 +23,11 @@ export const Route = createFileRoute('/employee-portal')({
   },
   component: RouteComponent,
   loader: async ({ context }) => {
-    const { queryClient, auth } = context
-    queryClient.ensureQueryData(employeeInfoQueryOptions(auth.userId))
-    queryClient.ensureQueryData(employeeTitlesByUserIdQueryOptions(auth.userId))
+    const employeeTitlesCollection = getEmployeeTitlesCollection(
+      context.auth.employeeId,
+    )
+    await employeesCollection.preload()
+    await employeeTitlesCollection.preload()
   },
 })
 
@@ -37,7 +36,7 @@ function RouteComponent() {
 
   return (
     <SidebarProvider>
-      <SharedLayoutSidebar user_id={auth.userId}>
+      <SharedLayoutSidebar employee_id={auth.employeeId}>
         <EmployeePortalSidebarContent />
       </SharedLayoutSidebar>
       <SidebarInset>
