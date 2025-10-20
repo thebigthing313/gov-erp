@@ -23,6 +23,8 @@ export const Route = createFileRoute('/(app)/')({
 
 function RouteComponent() {
   const { company, auth } = Route.useRouteContext()
+  if (!auth.employeeId) return null
+
   const { query } = useEmployee(auth.employeeId)
   const employee = query.data[0]
 
