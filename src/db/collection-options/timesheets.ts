@@ -23,7 +23,11 @@ export const TimesheetsByYearCollectionOptions = (year: number) =>
                 year,
             );
             if (error) throw error;
-            return data;
+            const strippedData = data.map((item) => {
+                const { pay_periods, ...rest } = item;
+                return rest;
+            });
+            return strippedData;
         },
         queryClient,
         getKey: (item) => item.id,

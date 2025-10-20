@@ -10,28 +10,18 @@ import {
 
 const { queryClient } = TanstackQueryProvider.getContext();
 
-type TimesheetEmployeeTime = Row<"timesheet_employee_times">;
-const table: Table = "timesheet_employee_times";
+type EmployeeTitle = Row<"employee_titles">;
+const table: Table = "employee_titles";
 
-export const TimesheetEmployeeTimesByEmployeeYearCollectionOptions = (
-    year: number,
+export const EmployeeTitlesByEmployeeIdCollectionOptions = (
     employee_id: string,
-) => queryCollectionOptions<TimesheetEmployeeTime>({
-    queryKey: [table, "year", year, "employee_id", employee_id],
+) => queryCollectionOptions({
+    queryKey: [table, "employee_id", employee_id],
     queryFn: async () => {
-        const { data, error } = await supabase.from(table).select(
-            "*, timesheet_employees(timesheets(pay_periods(payroll_year)))",
-        ).eq(
-            "pay_periods.payroll_year",
-            year,
-        ).eq("employee_id", employee_id);
+        const { data, error } = await supabase.from(table).select("*")
+            .eq("employee_id", employee_id);
         if (error) throw error;
-        const strippedData = data.map((item) => {
-            const { timesheet_employees, ...rest } = item;
-            return rest as TimesheetEmployeeTime;
-        });
-
-        return strippedData;
+        return data as Array<EmployeeTitle>;
     },
     queryClient,
     getKey: (item) => item.id,
