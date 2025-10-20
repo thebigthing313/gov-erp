@@ -22,24 +22,39 @@ export async function dbInsert<T extends Table>(
 export async function dbUpdate<T extends Table>(
     table: T,
     items: Array<{ id: string; changes: Update<T> }>,
-): Promise<Row<T>[]> {
+): Promise<Array<{ data: Row<T>[] | null; error: any }>> {
     const persistUpdate = async (
         { id, changes }: { id: string; changes: Update<T> },
     ) => {
-        // include .select() so data is the returned rows
+        // This inner function should NOT throw, but rather return the {data, error} tuple.
         const { data, error } = await supabase.from(table)
-            .update(changes as any) // Cast to bypass Supabase's overly strict typing
+            .update(changes as any)
             .eq("id", id as any)
             .select();
-        if (error) throw error;
-        return (data ?? []) as unknown as Row<T>[];
+
+        return { data: (data ?? []) as unknown as Row<T>[], error };
     };
 
-    // await all updates and flatten the results into Row<T>[]
-    const updates = await Promise.all(
-        items.map(({ id, changes }) => persistUpdate({ id, changes })),
+    // Use Promise.allSettled to wait for all, and extract the fulfillment value.
+    const results = await Promise.allSettled(
+        items.map((item) => persistUpdate(item)),
     );
-    return updates.flat();
+
+    // Map the settled results to your desired array format {data, error}
+    return results.map((result) => {
+        if (result.status === "fulfilled") {
+            // result.value is { data, error } from persistUpdate
+            return {
+                data: result.value.error ? null : result.value.data,
+                error: result.value.error,
+            };
+        }
+        // This handles cases where persistUpdate itself failed to execute (e.g., network down)
+        return {
+            data: null,
+            error: result.reason,
+        };
+    });
 }
 
 export async function dbDelete(
