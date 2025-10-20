@@ -1,6 +1,6 @@
 import { PendingComponent } from '@/components/pending-component'
+import { employeesCollection } from '@/db/collections'
 import { getAuth, isAuthenticated, Auth } from '@/lib/auth'
-import { employeeInfoQueryOptions } from '@/queries/employees/query-options'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)')({
@@ -15,10 +15,8 @@ export const Route = createFileRoute('/(app)')({
   },
   component: RouteComponent,
   pendingComponent: PendingComponent,
-  loader: async ({ context }) => {
-    context.queryClient.ensureQueryData(
-      employeeInfoQueryOptions(context.auth.userId),
-    )
+  loader: async () => {
+    await employeesCollection.preload()
   },
 })
 
