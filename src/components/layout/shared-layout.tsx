@@ -14,13 +14,10 @@ import {
 } from '@/components/ui/sidebar'
 import { Home, LogOutIcon } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  employeeInfoQueryOptions,
-  employeeTitlesByUserIdQueryOptions,
-} from '@/queries/employees/query-options'
 import { useNavigate } from '@tanstack/react-router'
 import { signOut } from '@/lib/auth'
+import { useEmployee } from '@/db/hooks/use-employee'
+import { useEmployeeTitles } from '@/db/hooks/use-employee-titles'
 
 interface SharedLayoutProps {
   children?: React.ReactNode
@@ -82,18 +79,20 @@ export function SharedLayoutOutlet({ children }: SharedLayoutOutletProps) {
 }
 
 interface SharedLayoutSidebarProps {
-  user_id: string
+  employee_id: string
   children?: React.ReactNode
 }
 
 export function SharedLayoutSidebar({
-  user_id,
+  employee_id,
   children,
 }: SharedLayoutSidebarProps) {
-  const { data: employee } = useSuspenseQuery(employeeInfoQueryOptions(user_id))
-  const { data: titles } = useSuspenseQuery(
-    employeeTitlesByUserIdQueryOptions(user_id),
-  )
+  const { query: employeeQuery } = useEmployee(employee_id)
+  const { query: titlesQuery } = useEmployeeTitles(employee_id)
+
+  const employee = employeeQuery.data[0]
+  const currentTitle = titlesQuery.data[0]
+
   const navigate = useNavigate()
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -115,7 +114,7 @@ export function SharedLayoutSidebar({
               <div className="grid gap-0">
                 <span className="truncate font-medium">{`${employee.first_name} ${employee.last_name}`}</span>
                 <span className="text-muted-foreground">
-                  {titles[0].titles.title_name}
+                  {currentTitle.titles.title_name}
                 </span>
               </div>
             </SidebarMenuButton>
