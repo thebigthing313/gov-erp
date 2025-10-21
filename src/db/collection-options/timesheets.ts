@@ -1,6 +1,6 @@
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
 import { Table } from "@/lib/data-types";
-import { supabase } from "@/main";
+import { supabase } from "@/db/client";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import {
     collectionOnDelete,
@@ -30,6 +30,7 @@ export const TimesheetsByYearCollectionOptions = (year: number) =>
             return strippedData;
         },
         queryClient,
+        staleTime: 1000 * 60 * 30, // 5 minutes
         getKey: (item) => item.id,
         onInsert: ({ transaction, collection }) =>
             collectionOnInsert(table, transaction, collection),

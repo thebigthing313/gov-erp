@@ -1,5 +1,5 @@
 import type { Insert, Row, Table, Update } from "@/lib/data-types";
-import { supabase } from "@/main";
+import { supabase } from "@/db/client";
 
 export async function dbSelect<T extends Table>(
     table: T,

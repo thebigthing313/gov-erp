@@ -1,6 +1,6 @@
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
 import { Row, Table } from "@/lib/data-types";
-import { supabase } from "@/main";
+import { supabase } from "@/db/client";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import {
     collectionOnDelete,
@@ -24,6 +24,7 @@ export const EmployeeTitlesByEmployeeIdCollectionOptions = (
         return data as Array<EmployeeTitle>;
     },
     queryClient,
+    staleTime: 1000 * 60 * 60, // 1 hour
     getKey: (item) => item.id,
     onInsert: async ({ transaction, collection }) =>
         await collectionOnInsert(table, transaction, collection),

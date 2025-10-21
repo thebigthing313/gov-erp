@@ -1,6 +1,6 @@
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
 import { Row, Table } from "@/lib/data-types";
-import { supabase } from "@/main";
+import { supabase } from "@/db/client";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import {
     collectionOnDelete,
