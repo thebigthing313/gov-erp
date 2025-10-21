@@ -1,5 +1,5 @@
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
-import { Row, Table } from "@/lib/data-types";
+import { AppRow, Table } from "@/lib/data-types";
 import { dbSelect } from "@/db/db-functions";
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
 import {
@@ -17,7 +17,7 @@ export const DBWholeCollectionOptions = <T extends Table>(
     queryKey: [table as string],
     queryFn: async () => {
         const data = await dbSelect(table);
-        return data as unknown as Row<T>[];
+        return data as unknown as AppRow<T>[];
     },
     staleTime,
     queryClient,
