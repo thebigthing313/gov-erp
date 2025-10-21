@@ -13,3 +13,11 @@ export const timeTypesCollection = createCollection(
 export const payPeriodsCollection = createCollection(
     DBWholeCollectionOptions("pay_periods", Infinity),
 );
+
+export const holidaysCollection = createCollection(
+    DBWholeCollectionOptions("holidays", Infinity),
+);
+
+export const holidayDatesCollection = createCollection(
+    DBWholeCollectionOptions("holiday_dates", Infinity),
+);
