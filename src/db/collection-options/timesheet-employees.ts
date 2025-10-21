@@ -1,5 +1,5 @@
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
-import { Row, Table } from "@/lib/data-types";
+import { AppRow, Table } from "@/lib/data-types";
 import { supabase } from "@/db/client";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import {
@@ -7,10 +7,11 @@ import {
     collectionOnInsert,
     collectionOnUpdate,
 } from "../collection-functions";
+import { transformDates } from "../db-functions";
 
 const { queryClient } = TanstackQueryProvider.getContext();
 
-type TimesheetEmployee = Row<"timesheet_employees">;
+type TimesheetEmployee = AppRow<"timesheet_employees">;
 const table: Table = "timesheet_employees";
 
 export const TimesheetEmployeesByEmployeeYearCollectionOptions = (
@@ -28,9 +29,14 @@ export const TimesheetEmployeesByEmployeeYearCollectionOptions = (
         if (error) throw error;
         const strippedData = data.map((item) => {
             const { timesheets, ...rest } = item;
-            return rest as TimesheetEmployee;
+            return rest;
         });
-        return strippedData;
+
+        const transformedData = (strippedData ?? []).map((item) =>
+            transformDates(item)
+        );
+
+        return transformedData as unknown as Array<TimesheetEmployee>;
     },
     queryClient,
     getKey: (item) => item.id,

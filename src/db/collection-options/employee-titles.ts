@@ -1,5 +1,5 @@
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
-import { Row, Table } from "@/lib/data-types";
+import { AppRow, Table } from "@/lib/data-types";
 import { supabase } from "@/db/client";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import {
@@ -7,10 +7,11 @@ import {
     collectionOnInsert,
     collectionOnUpdate,
 } from "../collection-functions";
+import { transformDates } from "../db-functions";
 
 const { queryClient } = TanstackQueryProvider.getContext();
 
-type EmployeeTitle = Row<"employee_titles">;
+type EmployeeTitle = AppRow<"employee_titles">;
 const table: Table = "employee_titles";
 
 export const EmployeeTitlesByEmployeeIdCollectionOptions = (
@@ -20,8 +21,14 @@ export const EmployeeTitlesByEmployeeIdCollectionOptions = (
     queryFn: async () => {
         const { data, error } = await supabase.from(table).select("*")
             .eq("employee_id", employee_id);
+
         if (error) throw error;
-        return data as Array<EmployeeTitle>;
+
+        const transformedData = (data ?? []).map((item) =>
+            transformDates(item)
+        );
+
+        return transformedData as unknown as Array<EmployeeTitle>;
     },
     queryClient,
     staleTime: 1000 * 60 * 60, // 1 hour
