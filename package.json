@@ -10,8 +10,7 @@
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
-    "db-types": "supabase gen types typescript --local > ./src/lib/supabase-types.ts",
-    "db-schemas": "pnpm supazod -i ./src/lib/supabase-types.ts -o ./src/lib/db-schemas.ts -t ./src/lib/db-schemas.d.ts -s public"
+    "db-types": "supabase gen types typescript --local > ./src/db/supabase-types.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^10.0.0",
