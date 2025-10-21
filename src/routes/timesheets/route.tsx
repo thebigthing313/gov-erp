@@ -5,8 +5,17 @@ import {
 } from '@/components/layout/shared-layout'
 import { Typography } from '@/components/typography'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import {
+  employeesCollection,
+  holidayDatesCollection,
+  holidaysCollection,
+  titlesCollection,
+} from '@/db/collections'
+import { getEmployeeTitlesCollection } from '@/db/factories/employee-titles'
+import { getTimesheetsCollection } from '@/db/factories/timesheets'
 import { Auth, getAuth, hasPermission, isAuthenticated } from '@/lib/auth'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { TimesheetsSidebarContent } from './-components/sidebar-contents'
 
 export const Route = createFileRoute('/timesheets')({
   beforeLoad: async () => {
@@ -25,6 +34,16 @@ export const Route = createFileRoute('/timesheets')({
     return { auth: auth as Auth }
   },
   component: RouteComponent,
+  loader: async ({ context }) => {
+    await Promise.all([
+      titlesCollection.preload(),
+      employeesCollection.preload(),
+      getEmployeeTitlesCollection(context.auth.employeeId).preload(),
+      holidaysCollection.preload(),
+      holidayDatesCollection.preload(),
+      getTimesheetsCollection(new Date().getFullYear()).preload(),
+    ])
+  },
 })
 
 function RouteComponent() {
@@ -32,7 +51,7 @@ function RouteComponent() {
   return (
     <SidebarProvider>
       <SharedLayoutSidebar employee_id={auth.employeeId}>
-        SIDEBARCONTENT
+        <TimesheetsSidebarContent />
       </SharedLayoutSidebar>
       <SidebarInset>
         <SharedLayoutHeader>
