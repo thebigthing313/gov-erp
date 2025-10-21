@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import { EyeIcon, EyeOff } from 'lucide-react'
 import { Field, FieldDescription, FieldError, FieldLabel } from '../ui/field'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
-import { Button } from '../ui/button'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '../ui/input-group'
 
 interface PasswordInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
@@ -33,13 +37,13 @@ export function PasswordInput({
         ></InputGroupInput>
 
         <InputGroupAddon align="inline-end">
-          <Button
+          <InputGroupButton
             variant="ghost"
             type="button"
             onClick={() => setIsPasswordVisible(!isPasswordVisible)}
           >
             {isPasswordVisible ? <EyeOff /> : <EyeIcon />}
-          </Button>
+          </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
       {errors && errors.length > 0 && (
