@@ -1,13 +1,13 @@
 import { Collection, createCollection } from "@tanstack/react-db";
 import { EmployeeTitlesByEmployeeIdCollectionOptions } from "../collection-options/employee-titles";
 import { getCanonicalKey } from "@/lib/collection-utils";
-import { Row } from "@/lib/data-types";
+import { AppRow } from "@/lib/data-types";
 
 type CollectionKeyObject = {
     employee_id: string;
 };
 
-type EmployeeTitle = Row<"employee_titles">;
+type EmployeeTitle = AppRow<"employee_titles">;
 
 const collectionCache = new WeakMap<
     CollectionKeyObject,

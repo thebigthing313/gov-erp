@@ -1,14 +1,14 @@
 import { Collection, createCollection } from "@tanstack/react-db";
 import { TimesheetEmployeeTimesByEmployeeYearCollectionOptions } from "../collection-options/timesheet-employee-times";
 import { getCanonicalKey } from "@/lib/collection-utils";
-import { Row } from "@/lib/data-types";
+import { AppRow } from "@/lib/data-types";
 
 type CollectionKeyObject = {
     year: number;
     employee_id: string;
 };
 
-type TimeSheetEmployeeTime = Row<"timesheet_employee_times">;
+type TimeSheetEmployeeTime = AppRow<"timesheet_employee_times">;
 
 const collectionCache = new WeakMap<
     CollectionKeyObject,
