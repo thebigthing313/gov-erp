@@ -1,4 +1,4 @@
-import { supabase } from "@/main";
+import { supabase } from "@/db/client";
 
 export async function decryptSSN(
   employee_id: string,

@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { dbDelete, dbInsert, dbSelect, dbUpdate } from "./db-functions";
 
 // Mock the supabase client
-vi.mock("@/main", () => ({
+vi.mock("@/db/client", () => ({
     supabase: {
         from: vi.fn(),
     },
 }));
 
-import { supabase } from "@/main";
+import { supabase } from "@/db/client";
 
 describe("dbSelect", () => {
     beforeEach(() => {

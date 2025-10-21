@@ -5,7 +5,7 @@
  */
 
 import { z } from "zod";
-import { type Json } from "./supabase-types";
+import { type Json } from "../db/supabase-types";
 
 export const publicTitleStatusSchema = z.union([
   z.literal("permanent"),
@@ -24,7 +24,7 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
       z.record(z.string(), z.union([jsonSchema, z.undefined()])),
       z.array(jsonSchema),
     ])
-    .nullable(),
+    .nullable()
 );
 
 export const publicEmployeeTitlesRowSchema = z.object({
