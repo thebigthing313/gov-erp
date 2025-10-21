@@ -1,9 +1,9 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase-types";
 
-export type MCMECSupabaseClient = SupabaseClient<Database>;
+type MCMECSupabaseClient = SupabaseClient<Database>;
 
-export function createMCMECClient(
+function createMCMECClient(
     supabaseUrl: string,
     anonKey: string,
 ): MCMECSupabaseClient {
@@ -15,3 +15,8 @@ export function createMCMECClient(
     });
     return supabase;
 }
+
+export const supabase = createMCMECClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+);
