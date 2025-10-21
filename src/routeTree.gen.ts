@@ -16,6 +16,7 @@ import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as TimesheetsIndexRouteImport } from './routes/timesheets/index'
 import { Route as EmployeePortalIndexRouteImport } from './routes/employee-portal/index'
 import { Route as appIndexRouteImport } from './routes/(app)/index'
+import { Route as TimesheetsHolidaysRouteImport } from './routes/timesheets/holidays'
 import { Route as TimesheetsChangelogRouteImport } from './routes/timesheets/changelog'
 import { Route as EmployeePortalProfileRouteImport } from './routes/employee-portal/profile'
 import { Route as EmployeePortalChangelogRouteImport } from './routes/employee-portal/changelog'
@@ -54,6 +55,11 @@ const appIndexRoute = appIndexRouteImport.update({
   path: '/',
   getParentRoute: () => appRouteRoute,
 } as any)
+const TimesheetsHolidaysRoute = TimesheetsHolidaysRouteImport.update({
+  id: '/holidays',
+  path: '/holidays',
+  getParentRoute: () => TimesheetsRouteRoute,
+} as any)
 const TimesheetsChangelogRoute = TimesheetsChangelogRouteImport.update({
   id: '/changelog',
   path: '/changelog',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
   '/employee-portal/profile': typeof EmployeePortalProfileRoute
   '/timesheets/changelog': typeof TimesheetsChangelogRoute
+  '/timesheets/holidays': typeof TimesheetsHolidaysRoute
   '/employee-portal/': typeof EmployeePortalIndexRoute
   '/timesheets/': typeof TimesheetsIndexRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
   '/employee-portal/profile': typeof EmployeePortalProfileRoute
   '/timesheets/changelog': typeof TimesheetsChangelogRoute
+  '/timesheets/holidays': typeof TimesheetsHolidaysRoute
   '/employee-portal': typeof EmployeePortalIndexRoute
   '/timesheets': typeof TimesheetsIndexRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
   '/employee-portal/profile': typeof EmployeePortalProfileRoute
   '/timesheets/changelog': typeof TimesheetsChangelogRoute
+  '/timesheets/holidays': typeof TimesheetsHolidaysRoute
   '/(app)/': typeof appIndexRoute
   '/employee-portal/': typeof EmployeePortalIndexRoute
   '/timesheets/': typeof TimesheetsIndexRoute
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/employee-portal/changelog'
     | '/employee-portal/profile'
     | '/timesheets/changelog'
+    | '/timesheets/holidays'
     | '/employee-portal/'
     | '/timesheets/'
   fileRoutesByTo: FileRoutesByTo
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/employee-portal/changelog'
     | '/employee-portal/profile'
     | '/timesheets/changelog'
+    | '/timesheets/holidays'
     | '/employee-portal'
     | '/timesheets'
   id:
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/employee-portal/changelog'
     | '/employee-portal/profile'
     | '/timesheets/changelog'
+    | '/timesheets/holidays'
     | '/(app)/'
     | '/employee-portal/'
     | '/timesheets/'
@@ -202,6 +214,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof appIndexRouteImport
       parentRoute: typeof appRouteRoute
+    }
+    '/timesheets/holidays': {
+      id: '/timesheets/holidays'
+      path: '/holidays'
+      fullPath: '/timesheets/holidays'
+      preLoaderRoute: typeof TimesheetsHolidaysRouteImport
+      parentRoute: typeof TimesheetsRouteRoute
     }
     '/timesheets/changelog': {
       id: '/timesheets/changelog'
@@ -275,11 +294,13 @@ const EmployeePortalRouteRouteWithChildren =
 
 interface TimesheetsRouteRouteChildren {
   TimesheetsChangelogRoute: typeof TimesheetsChangelogRoute
+  TimesheetsHolidaysRoute: typeof TimesheetsHolidaysRoute
   TimesheetsIndexRoute: typeof TimesheetsIndexRoute
 }
 
 const TimesheetsRouteRouteChildren: TimesheetsRouteRouteChildren = {
   TimesheetsChangelogRoute: TimesheetsChangelogRoute,
+  TimesheetsHolidaysRoute: TimesheetsHolidaysRoute,
   TimesheetsIndexRoute: TimesheetsIndexRoute,
 }
 
