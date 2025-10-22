@@ -2,7 +2,7 @@ import {
   SharedLayoutHeader,
   SharedLayoutOutlet,
   SharedLayoutSidebar,
-} from '@/components/layout/shared-layout'
+} from '@/components/shared-layout'
 import { Typography } from '@/components/typography'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Auth, getAuth, isAuthenticated } from '@/lib/auth'
