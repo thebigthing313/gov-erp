@@ -1,23 +1,5 @@
 alter table public.employees enable row level security;
 
-create function update_employees_modified_at()
-    returns trigger
-    language plpgsql
-    security invoker
-    set search_path = ''
-    as $$
-        begin 
-            NEW.modified_at = now();
-            return NEW;
-        end;
-    $$ ;
-
-create trigger updated_employees
-    before update
-    on public.employees
-    for each row
-    execute function update_employees_modified_at();
-
 create trigger encrypt_ssn_trigger
     before insert or update
     on public.employees
