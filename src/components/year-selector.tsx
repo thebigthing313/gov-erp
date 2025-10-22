@@ -1,8 +1,11 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { ButtonGroup } from './ui/button-group'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
 import { HTMLAttributes, Ref } from 'react'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from './ui/input-group'
 
 interface YearSelectorProps
   extends Omit<HTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
@@ -35,11 +38,14 @@ export function YearSelector({
   }
 
   return (
-    <ButtonGroup className={className}>
-      <Button onClick={handleDecrement}>
-        <ChevronLeft />
-      </Button>
-      <Input
+    <InputGroup className={className}>
+      <InputGroupAddon align="inline-start">
+        <InputGroupButton variant="secondary" onClick={handleDecrement}>
+          <ChevronLeft />
+        </InputGroupButton>
+      </InputGroupAddon>
+
+      <InputGroupInput
         ref={ref}
         {...props}
         value={value}
@@ -47,9 +53,11 @@ export function YearSelector({
         type="text"
         className="text-center"
       />
-      <Button onClick={handleIncrement}>
-        <ChevronRight />
-      </Button>
-    </ButtonGroup>
+      <InputGroupAddon align="inline-end">
+        <InputGroupButton variant="secondary" onClick={handleIncrement}>
+          <ChevronRight />
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
   )
 }
