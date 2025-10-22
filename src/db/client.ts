@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase-types";
 
-type MCMECSupabaseClient = SupabaseClient<Database>;
+export type MCMECSupabaseClient = SupabaseClient<Database>;
 
 function createMCMECClient(
     supabaseUrl: string,
