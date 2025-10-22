@@ -1,11 +1,13 @@
-export function formatDate(date: Date | undefined) {
+export function formatDate(
+    date: Date | undefined,
+    options: Omit<Intl.DateTimeFormatOptions, "timeZone"> = {},
+) {
     if (!date) {
         return "";
     }
     return date.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
+        timeZone: "UTC",
+        ...options,
     });
 }
 
