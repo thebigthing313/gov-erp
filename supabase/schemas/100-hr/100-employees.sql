@@ -1,7 +1,9 @@
 create table public.employees (
     id uuid not null default gen_random_uuid() primary key,
     created_at timestamp with time zone not null default now(),
+    created_by uuid references auth.users(id) on delete set null,
     modified_at timestamp with time zone not null default now(),
+    modified_by uuid references auth.users(id) on delete set null,
     first_name text not null,
     middle_name text,
     last_name text not null,
@@ -23,3 +25,8 @@ create table public.employees (
     constraint birth_date_past check (birth_date < now())
 );
 
+create trigger updated_employees
+    before update
+    on public.employees
+    for each row
+    execute function public.set_audit_fields();

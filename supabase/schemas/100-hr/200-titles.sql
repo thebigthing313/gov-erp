@@ -1,7 +1,9 @@
 create table public.titles (
     id uuid not null default gen_random_uuid() primary key,
     created_at timestamp with time zone not null default now(),
+    created_by uuid references auth.users(id) on delete set null,
     modified_at timestamp with time zone not null default now(),
+    modified_by uuid references auth.users(id) on delete set null,
     title_name text not null,
     is_clerical boolean not null default false,
     is_salaried boolean not null default false,
@@ -14,22 +16,8 @@ create table public.titles (
     constraint unique_code unique(csc_code)
 );
 
-
-
-create function update_titles_modified_at()
-    returns trigger
-    language plpgsql
-    security invoker
-    set search_path = ''
-    as $$
-        begin 
-            NEW.modified_at = now();
-            return NEW;
-        end;
-    $$ ;
-
 create trigger updated_titles
     before update
     on public.titles
     for each row
-    execute function update_titles_modified_at();
+    execute function public.set_audit_fields();
