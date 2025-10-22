@@ -37,30 +37,36 @@ export type Database = {
       employee_titles: {
         Row: {
           created_at: string
+          created_by: string | null
           employee_id: string
           end_date: string | null
           id: string
           modified_at: string
+          modified_by: string | null
           start_date: string
           title_id: string
           title_status: Database["public"]["Enums"]["title_status"]
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           employee_id: string
           end_date?: string | null
           id?: string
           modified_at?: string
+          modified_by?: string | null
           start_date: string
           title_id: string
           title_status: Database["public"]["Enums"]["title_status"]
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           employee_id?: string
           end_date?: string | null
           id?: string
           modified_at?: string
+          modified_by?: string | null
           start_date?: string
           title_id?: string
           title_status?: Database["public"]["Enums"]["title_status"]
@@ -87,6 +93,7 @@ export type Database = {
           birth_date: string
           cell_phone: string | null
           created_at: string
+          created_by: string | null
           csc_id: string | null
           email_address: string | null
           first_name: string
@@ -98,6 +105,7 @@ export type Database = {
           mailing_address: string | null
           middle_name: string | null
           modified_at: string
+          modified_by: string | null
           pers_membership_number: string | null
           pers_tier: string | null
           photo_url: string | null
@@ -108,6 +116,7 @@ export type Database = {
           birth_date: string
           cell_phone?: string | null
           created_at?: string
+          created_by?: string | null
           csc_id?: string | null
           email_address?: string | null
           first_name: string
@@ -119,6 +128,7 @@ export type Database = {
           mailing_address?: string | null
           middle_name?: string | null
           modified_at?: string
+          modified_by?: string | null
           pers_membership_number?: string | null
           pers_tier?: string | null
           photo_url?: string | null
@@ -129,6 +139,7 @@ export type Database = {
           birth_date?: string
           cell_phone?: string | null
           created_at?: string
+          created_by?: string | null
           csc_id?: string | null
           email_address?: string | null
           first_name?: string
@@ -140,6 +151,7 @@ export type Database = {
           mailing_address?: string | null
           middle_name?: string | null
           modified_at?: string
+          modified_by?: string | null
           pers_membership_number?: string | null
           pers_tier?: string | null
           photo_url?: string | null
@@ -151,21 +163,30 @@ export type Database = {
       holiday_dates: {
         Row: {
           created_at: string
+          created_by: string | null
           holiday_date: string
           holiday_id: string
           id: string
+          modified_at: string
+          modified_by: string | null
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           holiday_date: string
           holiday_id: string
           id?: string
+          modified_at?: string
+          modified_by?: string | null
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           holiday_date?: string
           holiday_id?: string
           id?: string
+          modified_at?: string
+          modified_by?: string | null
         }
         Relationships: [
           {
@@ -180,20 +201,32 @@ export type Database = {
       holidays: {
         Row: {
           created_at: string
+          created_by: string | null
           definition: string
           id: string
+          is_function_available: boolean
+          modified_at: string
+          modified_by: string | null
           name: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           definition: string
           id?: string
+          is_function_available?: boolean
+          modified_at?: string
+          modified_by?: string | null
           name: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           definition?: string
           id?: string
+          is_function_available?: boolean
+          modified_at?: string
+          modified_by?: string | null
           name?: string
         }
         Relationships: []
@@ -202,9 +235,11 @@ export type Database = {
         Row: {
           begin_date: string
           created_at: string
+          created_by: string | null
           end_date: string
           id: string
           modified_at: string
+          modified_by: string | null
           pay_date: string
           pay_period_number: number
           payroll_year: number
@@ -212,9 +247,11 @@ export type Database = {
         Insert: {
           begin_date: string
           created_at?: string
+          created_by?: string | null
           end_date: string
           id?: string
           modified_at?: string
+          modified_by?: string | null
           pay_date: string
           pay_period_number: number
           payroll_year: number
@@ -222,9 +259,11 @@ export type Database = {
         Update: {
           begin_date?: string
           created_at?: string
+          created_by?: string | null
           end_date?: string
           id?: string
           modified_at?: string
+          modified_by?: string | null
           pay_date?: string
           pay_period_number?: number
           payroll_year?: number
@@ -251,28 +290,34 @@ export type Database = {
       }
       starting_balances: {
         Row: {
-          created_at: string | null
+          created_at: string
+          created_by: string | null
           employee_id: string
           id: string
-          modified_at: string | null
+          modified_at: string
+          modified_by: string | null
           payroll_year: number
           starting_balance: number
           time_type_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
+          created_by?: string | null
           employee_id: string
           id?: string
-          modified_at?: string | null
+          modified_at?: string
+          modified_by?: string | null
           payroll_year: number
           starting_balance?: number
           time_type_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
+          created_by?: string | null
           employee_id?: string
           id?: string
-          modified_at?: string | null
+          modified_at?: string
+          modified_by?: string | null
           payroll_year?: number
           starting_balance?: number
           time_type_id?: string
@@ -297,22 +342,31 @@ export type Database = {
       time_types: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           is_paid: boolean
+          modified_at: string
+          modified_by: string | null
           type_name: string
           type_short_name: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           is_paid: boolean
+          modified_at?: string
+          modified_by?: string | null
           type_name: string
           type_short_name: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           is_paid?: boolean
+          modified_at?: string
+          modified_by?: string | null
           type_name?: string
           type_short_name?: string
         }
@@ -321,25 +375,31 @@ export type Database = {
       timesheet_employee_times: {
         Row: {
           created_at: string
+          created_by: string | null
           hours_amount: number
           id: string
           modified_at: string
+          modified_by: string | null
           time_type_id: string
           timesheet_employee_id: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           hours_amount?: number
           id?: string
           modified_at?: string
+          modified_by?: string | null
           time_type_id: string
           timesheet_employee_id: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           hours_amount?: number
           id?: string
           modified_at?: string
+          modified_by?: string | null
           time_type_id?: string
           timesheet_employee_id?: string
         }
@@ -363,28 +423,34 @@ export type Database = {
       timesheet_employees: {
         Row: {
           created_at: string
+          created_by: string | null
           employee_id: string
           id: string
           is_late: boolean
           modified_at: string
+          modified_by: string | null
           notes: string | null
           timesheet_id: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           employee_id: string
           id?: string
           is_late?: boolean
           modified_at?: string
+          modified_by?: string | null
           notes?: string | null
           timesheet_id: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           employee_id?: string
           id?: string
           is_late?: boolean
           modified_at?: string
+          modified_by?: string | null
           notes?: string | null
           timesheet_id?: string
         }
@@ -408,27 +474,33 @@ export type Database = {
       timesheets: {
         Row: {
           created_at: string
+          created_by: string | null
           holiday_date_id: string | null
           id: string
           modified_at: string
+          modified_by: string | null
           notes: string | null
           pay_period_id: string
           timesheet_date: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           holiday_date_id?: string | null
           id?: string
           modified_at?: string
+          modified_by?: string | null
           notes?: string | null
           pay_period_id: string
           timesheet_date: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           holiday_date_id?: string | null
           id?: string
           modified_at?: string
+          modified_by?: string | null
           notes?: string | null
           pay_period_id?: string
           timesheet_date?: string
@@ -453,6 +525,7 @@ export type Database = {
       titles: {
         Row: {
           created_at: string
+          created_by: string | null
           csc_code: string
           csc_description_url: string | null
           id: string
@@ -461,11 +534,13 @@ export type Database = {
           maximum_annual_salary: number | null
           minimum_annual_salary: number | null
           modified_at: string
+          modified_by: string | null
           title_description_url: string | null
           title_name: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           csc_code: string
           csc_description_url?: string | null
           id?: string
@@ -474,11 +549,13 @@ export type Database = {
           maximum_annual_salary?: number | null
           minimum_annual_salary?: number | null
           modified_at?: string
+          modified_by?: string | null
           title_description_url?: string | null
           title_name: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           csc_code?: string
           csc_description_url?: string | null
           id?: string
@@ -487,6 +564,7 @@ export type Database = {
           maximum_annual_salary?: number | null
           minimum_annual_salary?: number | null
           modified_at?: string
+          modified_by?: string | null
           title_description_url?: string | null
           title_name?: string
         }
