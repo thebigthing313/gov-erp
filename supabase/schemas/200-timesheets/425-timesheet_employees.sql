@@ -12,7 +12,7 @@ create table public.timesheet_employees(
 );
 
 create trigger updated_timesheet_employees
-    before update
+    before update or insert
     on public.timesheet_employees
     for each row
     execute function public.set_audit_fields();
