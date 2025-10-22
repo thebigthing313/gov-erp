@@ -2,7 +2,7 @@ import {
   SharedLayoutHeader,
   SharedLayoutOutlet,
   SharedLayoutSidebar,
-} from '@/components/layout/shared-layout'
+} from '@/components/shared-layout'
 import { Typography } from '@/components/typography'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import {
@@ -16,6 +16,7 @@ import { getTimesheetsCollection } from '@/db/factories/timesheets'
 import { Auth, getAuth, hasPermission, isAuthenticated } from '@/lib/auth'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { TimesheetsSidebarContent } from './-components/sidebar-contents'
+import { Spinner } from '@/components/ui/spinner'
 
 export const Route = createFileRoute('/timesheets')({
   beforeLoad: async () => {
@@ -33,6 +34,7 @@ export const Route = createFileRoute('/timesheets')({
 
     return { auth: auth as Auth }
   },
+  pendingComponent: () => <Spinner />,
   component: RouteComponent,
   loader: async ({ context }) => {
     await Promise.all([
