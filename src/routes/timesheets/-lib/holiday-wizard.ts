@@ -16,19 +16,11 @@ const holidayFunctionMap: Record<string, (year: number) => Date> = {
     "ca2e3381-b892-4ce5-80d7-379dd6863c55": getChristmasDay,
 };
 
-type HolidayDate = {
-    id: string;
-    date: Date;
-};
-
-export function generateHolidayDates(
+export function getHolidayDate(
     year: number,
-    holiday_id: Array<string>,
-): Array<HolidayDate | null> {
-    return holiday_id.map((id) => {
-        const holidayFunction = holidayFunctionMap[id];
-        return holidayFunction ? { id, date: holidayFunction(year) } : null;
-    });
+    holiday_id: string,
+): Date | null {
+    return holidayFunctionMap[holiday_id]?.(year) ?? null;
 }
 
 function getNewYearsDay(year: number): Date {
