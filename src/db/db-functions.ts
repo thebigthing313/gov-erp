@@ -8,6 +8,7 @@ import { supabase } from "@/db/client";
 /**
  * Transforms string dates/timestamps in a record into native JavaScript Date objects
  * based on the '_at' and '_date' naming conventions.
+ * Appends 'T00:00:00.000Z' to date-only fields to ensure UTC interpretation.
  * @param record The raw object returned from Supabase.
  * @returns The object with date fields converted to Date objects.
  */
@@ -22,16 +23,21 @@ export function transformDates<T>(record: T): T {
         if (Object.prototype.hasOwnProperty.call(newRecord, key)) {
             const value = newRecord[key];
 
-            // 1. Check for string value and naming convention
-            if (
-                typeof value === "string" &&
-                (key.endsWith("_at") || key.endsWith("_date"))
-            ) {
-                const date = new Date(value);
+            if (typeof value === "string") {
+                let date: Date | null = null;
 
-                // 2. Check if the string successfully parsed into a valid Date
-                if (!isNaN(date.getTime())) {
-                    // @ts-ignore - TS ignores the potential string assignment error here
+                // --- Date-Only Fields ---
+                if (key.endsWith("_date")) {
+                    // Force UTC interpretation by appending the time/zone indicator.
+                    date = new Date(value + "T00:00:00.000Z");
+                } // --- Timestamp Fields ---
+                else if (key.endsWith("_at")) {
+                    // Timestamps already contain the zone, so use them directly.
+                    date = new Date(value);
+                }
+
+                if (date && !isNaN(date.getTime())) {
+                    // @ts-ignore
                     newRecord[key] = date;
                 }
             }
