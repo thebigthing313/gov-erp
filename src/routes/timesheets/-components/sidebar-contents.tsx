@@ -6,7 +6,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { Link, LinkProps } from '@tanstack/react-router'
-import { LayoutDashboard, TreePalm, User } from 'lucide-react'
+import { LayoutDashboard, TreePalm } from 'lucide-react'
 
 type SidebarItem = {
   icon: React.ReactNode
