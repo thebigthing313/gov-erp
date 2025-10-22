@@ -26,7 +26,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   errorComponent: RootErrorComponent,
   notFoundComponent: NotFoundComponent,
   component: () => (
-    <>
+    <div className="h-screen">
       <Outlet />
       <Toaster />
       <TanStackDevtools
@@ -41,7 +41,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           TanStackQueryDevtools,
         ]}
       />
-    </>
+    </div>
   ),
 })
 
