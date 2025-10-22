@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { Home, LogOutIcon } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { useNavigate } from '@tanstack/react-router'
 import { signOut } from '@/lib/auth'
 import { useEmployee } from '@/db/hooks/use-employee'
@@ -25,7 +25,7 @@ interface SharedLayoutProps {
 
 export function SharedLayout({ children }: SharedLayoutProps) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="max-h-svh">
       <SidebarInset className="h-screen">{children}</SidebarInset>
     </SidebarProvider>
   )
@@ -45,7 +45,7 @@ export function SharedLayoutHeader({
 }: SharedLayoutHeaderProps) {
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-100 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator
@@ -64,18 +64,18 @@ interface SharedLayoutInsetProps {
   children?: React.ReactNode
 }
 export function SharedLayoutInset({ children }: SharedLayoutInsetProps) {
-  return <SidebarInset className="h-full w-full">{children}</SidebarInset>
+  return (
+    <SidebarInset className="flex flex-col h-full w-full">
+      {children}
+    </SidebarInset>
+  )
 }
 
 interface SharedLayoutOutletProps {
   children?: React.ReactNode
 }
 export function SharedLayoutOutlet({ children }: SharedLayoutOutletProps) {
-  return (
-    <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto">
-      {children}
-    </div>
-  )
+  return <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
 }
 
 interface SharedLayoutSidebarProps {
