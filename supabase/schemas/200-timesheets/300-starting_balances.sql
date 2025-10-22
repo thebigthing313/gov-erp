@@ -13,7 +13,7 @@ create table public.starting_balances (
 );
 
 create trigger update_starting_balances
-    before update
+    before update or insert
     on public.starting_balances
     for each row
     execute function public.set_audit_fields()

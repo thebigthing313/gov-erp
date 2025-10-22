@@ -17,7 +17,7 @@ create table public.employee_titles (
 );
 
 create trigger updated_employees_titles
-    before update
+    before update or insert
     on public.employee_titles
     for each row
     execute function public.set_audit_fields();

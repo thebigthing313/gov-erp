@@ -11,7 +11,7 @@ create table public.time_types (
 );
 
 create trigger updated_time_types
-    before update
+    before update or insert
     on public.time_types
     for each row
     execute function public.set_audit_fields();

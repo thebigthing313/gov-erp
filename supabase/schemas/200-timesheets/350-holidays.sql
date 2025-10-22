@@ -10,7 +10,7 @@ create table public.holidays (
 );
 
 create trigger updated_holidays
-    before update
+    before update or insert
     on public.holidays
     for each row
     execute function public.set_audit_fields();

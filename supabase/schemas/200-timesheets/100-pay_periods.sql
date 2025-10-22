@@ -15,7 +15,7 @@ create table "public"."pay_periods" (
 );
 
 create trigger updated_pay_periods
-    before update
+    before update or insert
     on public.pay_periods
     for each row
     execute function public.set_audit_fields();

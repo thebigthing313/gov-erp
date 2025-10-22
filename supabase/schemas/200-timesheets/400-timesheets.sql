@@ -29,7 +29,7 @@ create table public.timesheets (
 );
 
 create trigger updated_timesheets
-    before update
+    before update or insert
     on public.timesheets
     for each row
     execute function public.set_audit_fields();
