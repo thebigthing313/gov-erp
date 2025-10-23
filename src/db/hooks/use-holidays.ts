@@ -8,7 +8,8 @@ import {
 } from "@tanstack/react-db";
 import { holidayDatesCollection, holidaysCollection } from "../collections";
 
-export function useHolidays(year: number) {
+export function useHolidays(year?: number) {
+    year = year ?? new Date().getFullYear();
     const startOfYear = new Date(`${year}-01-01`);
     const endOfYear = new Date(`${year}-12-31`);
 
