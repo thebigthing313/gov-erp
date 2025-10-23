@@ -82,7 +82,6 @@ const authLoginRoute = authLoginRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof appIndexRoute
   '/employee-portal': typeof EmployeePortalRouteRouteWithChildren
   '/timesheets': typeof TimesheetsRouteRouteWithChildren
   '/login': typeof authLoginRoute
@@ -90,16 +89,17 @@ export interface FileRoutesByFullPath {
   '/employee-portal/profile': typeof EmployeePortalProfileRoute
   '/timesheets/changelog': typeof TimesheetsChangelogRoute
   '/timesheets/holidays': typeof TimesheetsHolidaysRoute
+  '/': typeof appIndexRoute
   '/employee-portal/': typeof EmployeePortalIndexRoute
   '/timesheets/': typeof TimesheetsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof appIndexRoute
   '/login': typeof authLoginRoute
   '/employee-portal/changelog': typeof EmployeePortalChangelogRoute
   '/employee-portal/profile': typeof EmployeePortalProfileRoute
   '/timesheets/changelog': typeof TimesheetsChangelogRoute
   '/timesheets/holidays': typeof TimesheetsHolidaysRoute
+  '/': typeof appIndexRoute
   '/employee-portal': typeof EmployeePortalIndexRoute
   '/timesheets': typeof TimesheetsIndexRoute
 }
@@ -121,7 +121,6 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/employee-portal'
     | '/timesheets'
     | '/login'
@@ -129,16 +128,17 @@ export interface FileRouteTypes {
     | '/employee-portal/profile'
     | '/timesheets/changelog'
     | '/timesheets/holidays'
+    | '/'
     | '/employee-portal/'
     | '/timesheets/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/login'
     | '/employee-portal/changelog'
     | '/employee-portal/profile'
     | '/timesheets/changelog'
     | '/timesheets/holidays'
+    | '/'
     | '/employee-portal'
     | '/timesheets'
   id:
@@ -182,15 +182,15 @@ declare module '@tanstack/react-router' {
     }
     '/(auth)': {
       id: '/(auth)'
-      path: '/'
-      fullPath: '/'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof authRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)': {
       id: '/(app)'
-      path: '/'
-      fullPath: '/'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof appRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
