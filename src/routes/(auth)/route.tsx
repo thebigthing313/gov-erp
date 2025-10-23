@@ -2,8 +2,8 @@ import { getAuth, isAuthenticated } from '@/lib/auth'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(auth)')({
-  beforeLoad: async ({ context }) => {
-    const auth = await getAuth(context.supabase)
+  beforeLoad: async () => {
+    const auth = await getAuth()
     if (isAuthenticated(auth) === true) throw redirect({ to: '/' })
   },
   component: RouteComponent,
