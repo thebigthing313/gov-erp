@@ -1,3 +1,4 @@
+import { FormField } from '@/components/form-fields/Form-field'
 import { PasswordInput } from '@/components/form-fields/password-input'
 import { SubmitButton } from '@/components/form-fields/submit-button'
 import { TextInput } from '@/components/form-fields/text-input'
@@ -84,15 +85,22 @@ function RouteComponent() {
                   name="email"
                   children={(field) => {
                     return (
-                      <TextInput
+                      <FormField
+                        isValid={field.state.meta.isValid}
+                        htmlFor={field.name}
                         label="E-mail"
-                        type="email"
-                        name={field.name}
-                        placeholder="aedes@mosquito.com"
-                        onChange={(e) => field.handleChange(e.target.value)}
                         errors={field.state.meta.errors}
-                        required
-                      />
+                      >
+                        <TextInput
+                          id={field.name}
+                          type="email"
+                          name={field.name}
+                          placeholder="aedes@mosquito.com"
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          isValid={field.state.meta.isValid}
+                          required
+                        />
+                      </FormField>
                     )
                   }}
                 />
@@ -100,13 +108,19 @@ function RouteComponent() {
                   name="password"
                   children={(field) => {
                     return (
-                      <PasswordInput
+                      <FormField
                         label="Password"
-                        name={field.name}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        htmlFor={field.name}
+                        isValid={field.state.meta.isValid}
                         errors={field.state.meta.errors}
-                        required
-                      />
+                      >
+                        <PasswordInput
+                          name={field.name}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          isValid={field.state.meta.isValid}
+                          required
+                        />
+                      </FormField>
                     )
                   }}
                 />
