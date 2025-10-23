@@ -8,6 +8,7 @@ import {
 
 interface GenericFieldProps {
   label?: string
+  htmlFor?: string
   description?: string
   errors?: Array<{ message?: string } | undefined>
   isValid?: boolean
@@ -18,6 +19,7 @@ interface GenericFieldProps {
 
 export function FormField({
   label,
+  htmlFor,
   description,
   errors,
   isValid,
@@ -26,7 +28,9 @@ export function FormField({
   orientation = 'vertical',
   ...props
 }: GenericFieldProps) {
-  const fieldLabel = label ? <FieldLabel>{label}</FieldLabel> : null
+  const fieldLabel = label ? (
+    <FieldLabel htmlFor={htmlFor}>{label}</FieldLabel>
+  ) : null
   const fieldDescription = description ? (
     <FieldDescription>{description}</FieldDescription>
   ) : null
