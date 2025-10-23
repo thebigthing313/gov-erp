@@ -1,4 +1,4 @@
-import { FormField } from '@/components/form-fields/Form-field'
+import { FormField } from '@/components/form-fields/form-field'
 import { PasswordInput } from '@/components/form-fields/password-input'
 import { SubmitButton } from '@/components/form-fields/submit-button'
 import { TextInput } from '@/components/form-fields/text-input'
@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { EmailSchema, PasswordSchema } from '@/lib/form-field-schemas'
 import { useForm } from '@tanstack/react-form'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Terminal } from 'lucide-react'
@@ -18,11 +19,6 @@ import z from 'zod'
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
-})
-
-const loginFormSchema = z.object({
-  email: z.email('Invalid e-mail address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters long.'),
 })
 
 export const Route = createFileRoute('/(auth)/login')({
@@ -41,7 +37,6 @@ function RouteComponent() {
       email: '',
       password: '',
     },
-    validators: { onChange: loginFormSchema },
     onSubmit: async ({ value }) => {
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: value.email,
@@ -82,21 +77,27 @@ function RouteComponent() {
             >
               <div className="flex flex-col gap-2">
                 <form.Field
+                  validators={{ onBlur: EmailSchema }}
                   name="email"
                   children={(field) => {
                     return (
                       <FormField
-                        isValid={field.state.meta.isValid}
+                        isValid={
+                          field.state.meta.isTouched
+                            ? field.state.meta.isValid
+                            : undefined
+                        }
                         htmlFor={field.name}
                         label="E-mail"
                         errors={field.state.meta.errors}
                       >
                         <TextInput
                           id={field.name}
-                          type="email"
                           name={field.name}
+                          value={field.state.value}
                           placeholder="aedes@mosquito.com"
                           onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
                           isValid={field.state.meta.isValid}
                           required
                         />
@@ -105,6 +106,7 @@ function RouteComponent() {
                   }}
                 />
                 <form.Field
+                  validators={{ onBlur: PasswordSchema }}
                   name="password"
                   children={(field) => {
                     return (
@@ -116,7 +118,9 @@ function RouteComponent() {
                       >
                         <PasswordInput
                           name={field.name}
+                          value={field.state.value}
                           onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
                           isValid={field.state.meta.isValid}
                           required
                         />
