@@ -44,7 +44,9 @@ export function useHolidays(year: number) {
                 { holiday_dates: holidayDatesByYear.collection },
                 ({ holidays, holiday_dates }) =>
                     eq(holiday_dates.holiday_id, holidays.id),
-            ).where(({ holiday_dates }) => isUndefined(holiday_dates)).select(
+            ).where(({ holiday_dates, holidays }) =>
+                and(isUndefined(holiday_dates), eq(holidays.is_active, true))
+            ).select(
                 ({ holidays }) => {
                     return {
                         id: holidays.id,

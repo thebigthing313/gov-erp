@@ -204,6 +204,7 @@ export type Database = {
           created_by: string | null
           definition: string
           id: string
+          is_active: boolean
           is_function_available: boolean
           modified_at: string
           modified_by: string | null
@@ -214,6 +215,7 @@ export type Database = {
           created_by?: string | null
           definition: string
           id?: string
+          is_active?: boolean
           is_function_available?: boolean
           modified_at?: string
           modified_by?: string | null
@@ -224,6 +226,7 @@ export type Database = {
           created_by?: string | null
           definition?: string
           id?: string
+          is_active?: boolean
           is_function_available?: boolean
           modified_at?: string
           modified_by?: string | null
