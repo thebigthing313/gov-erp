@@ -58,9 +58,17 @@ export function useHolidays(year?: number) {
         [year],
     );
 
+    const holidaysAlphabetical = useLiveQuery(
+        (q) =>
+            q.from({ holidays: holidaysCollection }).where(({ holidays }) =>
+                eq(holidays.is_active, true)
+            ).orderBy(({ holidays }) => holidays.name, "asc"),
+    );
+
     return {
         holidayDatesByYear,
         missingHolidaysByYear,
+        holidaysAlphabetical,
         holidays: holidaysCollection,
         holiday_dates: holidayDatesCollection,
     };
