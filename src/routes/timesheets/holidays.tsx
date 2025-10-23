@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/field'
 import { ComboBox } from '@/components/form-fields/combo-box'
 import { FormField } from '@/components/form-fields/form-field'
+import { DateInput } from '@/components/form-fields/date-input'
 
 export const Route = createFileRoute('/timesheets/holidays')({
   component: RouteComponent,
@@ -101,14 +102,14 @@ function AddNewHolidayForm({ year, className }: AddNewHolidayFormProps) {
   const form = useForm({
     defaultValues: {
       holiday_id: '',
-      holiday_date: '',
+      holiday_date: undefined as Date | undefined,
     },
     onSubmit: async ({ value }) => {
       //check if holiday and holiday_date already exist
       const existingHoliday = holidays.find(
         (date) =>
           date.holiday_id === value.holiday_id &&
-          date.holiday_date === new Date(value.holiday_date),
+          date.holiday_date === value.holiday_date,
       )
       //if so, notify user
       if (existingHoliday) {
@@ -118,7 +119,7 @@ function AddNewHolidayForm({ year, className }: AddNewHolidayFormProps) {
         holiday_dates.insert({
           id: crypto.randomUUID().toString(),
           holiday_id: value.holiday_id,
-          holiday_date: new Date(value.holiday_date),
+          holiday_date: value.holiday_date!,
         } as any)
         // reset form
         form.reset()
@@ -154,6 +155,23 @@ function AddNewHolidayForm({ year, className }: AddNewHolidayFormProps) {
                       value={field.state.value}
                       onChange={(newValue) => field.handleChange(newValue)}
                       items={comboboxItems}
+                    />
+                  </FormField>
+                )
+              }}
+            />
+            <form.Field
+              name="holiday_date"
+              children={(field) => {
+                return (
+                  <FormField
+                    label="Holiday Date"
+                    htmlFor={field.name}
+                    errors={field.state.meta.errors}
+                  >
+                    <DateInput
+                      value={field.state.value}
+                      onChange={(newValue) => field.handleChange(newValue)}
                     />
                   </FormField>
                 )
