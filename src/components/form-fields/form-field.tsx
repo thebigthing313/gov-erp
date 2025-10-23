@@ -22,7 +22,7 @@ export function FormField({
   htmlFor,
   description,
   errors,
-  isValid,
+  isValid = true,
   children,
   className,
   orientation = 'vertical',
@@ -44,7 +44,7 @@ export function FormField({
   return (
     <Field
       orientation={orientation}
-      data-invalid={isValid}
+      data-invalid={!isValid}
       className={className}
       {...props}
     >
@@ -54,7 +54,7 @@ export function FormField({
         unwrappedContent
       )}
       {children}
-      <FieldError></FieldError>
+      <FieldError className="text-xs tracking-tight" errors={errors} />
     </Field>
   )
 }
