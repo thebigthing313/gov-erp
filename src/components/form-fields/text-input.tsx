@@ -1,40 +1,65 @@
-import { Field, FieldDescription, FieldError, FieldLabel } from '../ui/field'
+import { CheckCircle, ClipboardCopy, X } from 'lucide-react'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
 import { Spinner } from '../ui/spinner'
+import { Button } from '../ui/button'
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  description?: string
+  isValid?: boolean
   isLoading?: boolean
-  errors?: Array<{ message?: string } | undefined>
-  label?: string
+  showPaste?: boolean
+  showClear?: boolean
+  className?: string
 }
 
 export function TextInput({
-  label,
-  description,
+  className,
   isLoading,
-  errors,
+  isValid,
+  showPaste,
+  showClear,
+  onChange,
   ...props
 }: TextInputProps) {
-  return (
-    <Field data-invalid={!!errors?.length}>
-      <FieldLabel>{label}</FieldLabel>
-      {description && <FieldDescription>{description}</FieldDescription>}
-      <InputGroup>
-        <InputGroupInput
-          {...props}
-          aria-invalid={!!errors?.length}
-        ></InputGroupInput>
-        {isLoading && (
-          <InputGroupAddon align="inline-end">
-            <Spinner />
-          </InputGroupAddon>
-        )}
-      </InputGroup>
+  const includeAddon = (isLoading || isValid || showPaste || showClear) ?? false
 
-      {errors && errors.length > 0 && (
-        <FieldError className="text-xs" errors={errors} />
+  const handlePasteClick = async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText()
+      onChange?.({
+        target: { value: clipboardText },
+      } as React.ChangeEvent<HTMLInputElement>)
+    } catch (error) {
+      console.error('Failed to read clipboard:', error)
+    }
+  }
+
+  const handleClearClick = () => {
+    onChange?.({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>)
+  }
+
+  return (
+    <InputGroup className={className} {...props}>
+      <InputGroupInput
+        type="text"
+        {...props}
+        aria-invalid={isValid}
+      ></InputGroupInput>
+      {includeAddon && (
+        <InputGroupAddon align="inline-end">
+          {isLoading && <Spinner />}
+          {isValid && <CheckCircle color="green" />}
+          {showClear && props.value && (
+            <Button variant="ghost" size="icon" onClick={handleClearClick}>
+              <X />
+            </Button>
+          )}
+          {showPaste && (
+            <Button variant="ghost" size="icon" onClick={handlePasteClick}>
+              <ClipboardCopy />
+            </Button>
+          )}
+        </InputGroupAddon>
       )}
-    </Field>
+    </InputGroup>
   )
 }
