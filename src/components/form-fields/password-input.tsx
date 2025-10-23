@@ -27,7 +27,7 @@ export function PasswordInput({
         id="password"
         type={isPasswordVisible ? 'text' : 'password'}
         {...props}
-        aria-invalid={isValid}
+        aria-invalid={!isValid}
       ></InputGroupInput>
 
       <InputGroupAddon align="inline-end">

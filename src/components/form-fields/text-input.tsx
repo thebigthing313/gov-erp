@@ -14,7 +14,7 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export function TextInput({
   className,
   isLoading,
-  isValid,
+  isValid = true,
   showPaste,
   showClear,
   onChange,
@@ -41,8 +41,9 @@ export function TextInput({
     <InputGroup className={className} {...props}>
       <InputGroupInput
         type="text"
+        onChange={onChange}
         {...props}
-        aria-invalid={isValid}
+        aria-invalid={!isValid}
       ></InputGroupInput>
       {includeAddon && (
         <InputGroupAddon align="inline-end">
