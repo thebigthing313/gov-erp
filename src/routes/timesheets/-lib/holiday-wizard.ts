@@ -1,3 +1,5 @@
+import { getUTCDate } from "@/lib/date-fns";
+
 const holidayFunctionMap: Record<string, (year: number) => Date> = {
     "578dc39b-2ff1-4184-bcce-2d31c19ea0e3": getNewYearsDay,
     "90a8b962-db6c-43c8-b995-a06a9f9f2e87": getMLKDay,
@@ -6,7 +8,7 @@ const holidayFunctionMap: Record<string, (year: number) => Date> = {
     "d8668b92-9511-4d09-ac71-3ef5548304a9": getGoodFriday,
     "28e5b22b-f43d-4b8c-a9f9-b91bb29d8f47": getMemorialDay,
     "b768f036-f9c4-488b-b9e7-e0909e22ce92": getJuneteenthNJ,
-    "9af07bea-cdd1-46a2-9612-2a85049ecf44": getIndpendenceDay,
+    "9af07bea-cdd1-46a2-9612-2a85049ecf44": getIndependenceDay,
     "06f5da74-8064-45bc-b79e-aca3604cee1e": getLaborDay,
     "bb269017-dd08-41e5-b068-20162b7a03e8": getColumbusDay,
     "a124e348-5125-4f4a-8f10-a9d812ada709": getElectionDay,
@@ -24,25 +26,29 @@ export function getHolidayDate(
 }
 
 function getNewYearsDay(year: number): Date {
-    return new Date(year, 0, 1);
+    return getUTCDate(year, 0, 1);
 }
 
 function getMLKDay(year: number): Date {
-    const januaryFirst = new Date(year, 0, 1);
-    const firstMonday = januaryFirst.getDate() +
-        ((8 - januaryFirst.getDay()) % 7);
-    return new Date(year, 0, firstMonday + 14); // Third Monday
+    const januaryFirst = getUTCDate(year, 0, 1);
+    const jan1stDayOfWeek = januaryFirst.getUTCDay();
+    const daysToAddForFirstMonday = (8 - jan1stDayOfWeek) % 7;
+    const dayOfFirstMonday = 1 + daysToAddForFirstMonday;
+    const dayOfThirdMonday = dayOfFirstMonday + 14;
+    return getUTCDate(year, 0, dayOfThirdMonday);
 }
 
 function getLincolnsBirthday(year: number): Date {
-    return new Date(year, 1, 12);
+    return getUTCDate(year, 1, 12);
 }
 
 function getPresidentsDay(year: number): Date {
-    const februaryFirst = new Date(year, 1, 1);
-    const firstMonday = februaryFirst.getDate() +
-        ((8 - februaryFirst.getDay()) % 7);
-    return new Date(year, 1, firstMonday + 14); // Third Monday
+    const februaryFirst = getUTCDate(year, 1, 1);
+    const feb1stDayOfWeek = februaryFirst.getUTCDay();
+    const daysToAddForFirstMonday = (8 - feb1stDayOfWeek) % 7;
+    const dayOfFirstMonday = 1 + daysToAddForFirstMonday;
+    const dayOfThirdMonday = dayOfFirstMonday + 14;
+    return getUTCDate(year, 1, dayOfThirdMonday);
 }
 
 function getGoodFriday(year: number): Date {
@@ -54,65 +60,87 @@ function getGoodFriday(year: number): Date {
     const e = b % 4;
     const f = Math.floor((b + 8) / 25);
     const g = Math.floor((b - f + 1) / 16);
-    const month = 3 + ((19 * a + b - d - g + 15) % 30);
-    const day = 28 + c - e + Math.floor(c / 4) + month;
-    const easterSunday = new Date(year, 2, day);
-    return new Date(easterSunday.getTime() - 2 * 24 * 60 * 60 * 1000); // Good Friday is two days before Easter Sunday
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const easterMonth = Math.floor((h + l - 7 * m + 114) / 31); // 3 or 4
+    const easterDay = ((h + l - 7 * m + 114) % 31) + 1;
+
+    const goodFridayMonth = easterMonth - 1;
+    const goodFridayDay = easterDay - 2;
+
+    return getUTCDate(year, goodFridayMonth, goodFridayDay);
 }
 
 function getMemorialDay(year: number): Date {
-    const mayLast = new Date(year, 4, 31);
-    const lastMonday = mayLast.getDate() - ((mayLast.getDay() + 6) % 7);
-    return new Date(year, 4, lastMonday);
+    const mayLast = getUTCDate(year, 4, 31);
+    const mayLastDayOfWeek = mayLast.getUTCDay();
+    const daysToSubtract = (mayLastDayOfWeek + 6) % 7;
+    const lastMondayDay = 31 - daysToSubtract;
+    return getUTCDate(year, 4, lastMondayDay);
 }
-
 function getJuneteenthNJ(year: number): Date {
-    const juneFirst = new Date(year, 5, 1);
-    const firstFriday = juneFirst.getDate() + ((8 - juneFirst.getDay()) % 7);
-    return new Date(year, 5, firstFriday + 14); // Third Friday
+    const juneFirst = getUTCDate(year, 5, 1);
+    const june1stDayOfWeek = juneFirst.getUTCDay();
+    const daysToAddForFirstFriday = (7 + 5 - june1stDayOfWeek) % 7;
+    const dayOfFirstFriday = 1 + daysToAddForFirstFriday;
+    const dayOfThirdFriday = dayOfFirstFriday + 14;
+    return getUTCDate(year, 5, dayOfThirdFriday);
 }
 
-function getIndpendenceDay(year: number): Date {
-    return new Date(year, 6, 4);
+function getIndependenceDay(year: number): Date {
+    return getUTCDate(year, 6, 4);
 }
 
 function getLaborDay(year: number): Date {
-    const septemberFirst = new Date(year, 8, 1);
-    const firstMonday = septemberFirst.getDate() +
-        ((8 - septemberFirst.getDay()) % 7);
-    return new Date(year, 8, firstMonday);
+    const septemberFirst = getUTCDate(year, 8, 1);
+    const sept1stDayOfWeek = septemberFirst.getUTCDay();
+    const daysToAddForFirstMonday = (7 + 1 - sept1stDayOfWeek) % 7;
+    const dayOfFirstMonday = 1 + daysToAddForFirstMonday;
+    return getUTCDate(year, 8, dayOfFirstMonday);
 }
 
 function getColumbusDay(year: number): Date {
-    const octoberFirst = new Date(year, 9, 1);
-    const firstMonday = octoberFirst.getDate() +
-        ((8 - octoberFirst.getDay()) % 7);
-    return new Date(year, 9, firstMonday + 7); // Second Monday
+    const octoberFirst = getUTCDate(year, 9, 1);
+    const oct1stDayOfWeek = octoberFirst.getUTCDay();
+    const daysToAddForFirstMonday = (7 + 1 - oct1stDayOfWeek) % 7;
+    const dayOfFirstMonday = 1 + daysToAddForFirstMonday;
+    const dayOfSecondMonday = dayOfFirstMonday + 7;
+    return getUTCDate(year, 9, dayOfSecondMonday);
 }
 
 function getElectionDay(year: number): Date {
-    const novemberFirst = new Date(year, 10, 1);
-    const firstMonday = novemberFirst.getDate() +
-        ((8 - novemberFirst.getDay()) % 7);
-    return new Date(year, 10, firstMonday + 1); // Tuesday after the first Monday
+    const novemberFirst = getUTCDate(year, 10, 1);
+    const nov1stDayOfWeek = novemberFirst.getUTCDay();
+    const daysToAddForFirstMonday = (7 + 1 - nov1stDayOfWeek) % 7;
+    const dayOfFirstMonday = 1 + daysToAddForFirstMonday;
+    const electionDay = dayOfFirstMonday + 1;
+    return getUTCDate(year, 10, electionDay);
 }
 
 function getVeteransDay(year: number): Date {
-    return new Date(year, 10, 11);
+    return getUTCDate(year, 10, 11);
 }
 
 function getThanksgivingDay(year: number): Date {
-    const novemberFirst = new Date(year, 10, 1);
-    const firstThursday = novemberFirst.getDate() +
-        ((11 - novemberFirst.getDay()) % 7);
-    return new Date(year, 10, firstThursday + 21); // Fourth Thursday
+    const novemberFirst = getUTCDate(year, 10, 1);
+    const nov1stDayOfWeek = novemberFirst.getUTCDay();
+    const daysToAddForFirstThursday = (7 + 4 - nov1stDayOfWeek) % 7;
+    const dayOfFirstThursday = 1 + daysToAddForFirstThursday;
+    const dayOfFourthThursday = dayOfFirstThursday + 21;
+    return getUTCDate(year, 10, dayOfFourthThursday);
 }
 
 function getDayAfterThanksgiving(year: number): Date {
     const thanksgiving = getThanksgivingDay(year);
-    return new Date(thanksgiving.getTime() + 24 * 60 * 60 * 1000); // Day after Thanksgiving
+    const yearComponent = thanksgiving.getUTCFullYear();
+    const monthComponent = thanksgiving.getUTCMonth();
+    const dayComponent = thanksgiving.getUTCDate();
+    return getUTCDate(yearComponent, monthComponent, dayComponent + 1);
 }
 
 function getChristmasDay(year: number): Date {
-    return new Date(year, 11, 25);
+    return getUTCDate(year, 11, 25);
 }
