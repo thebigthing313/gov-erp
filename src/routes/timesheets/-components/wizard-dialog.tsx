@@ -12,7 +12,7 @@ import { useHolidays } from '@/db/hooks/use-holidays'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { formatDate } from '@/lib/date-fns'
 import { getHolidayDate } from '../-lib/holiday-wizard'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 interface WizardDialogProps {
   year: number
@@ -23,18 +23,25 @@ interface WizardDialogProps {
 export function WizardDialog({ year, open, onOpenChange }: WizardDialogProps) {
   const isMobile = useIsMobile()
   const { missingHolidaysByYear, holiday_dates } = useHolidays(year)
-  const missingHolidayCalculatedDates = missingHolidaysByYear.data.map(
-    (holiday) => {
-      return {
+
+  // Safely handle loading state with memoization
+  const missingHolidayCalculatedDates = useMemo(
+    () =>
+      missingHolidaysByYear.data?.map((holiday) => ({
         ...holiday,
         holiday_date: getHolidayDate(year, holiday.id),
-      }
-    },
+      })) || [],
+    [missingHolidaysByYear.data, year],
   )
 
   const [holidaysToAdd, setHolidaysToAdd] = useState(
     missingHolidayCalculatedDates,
   )
+
+  // Update state when data loads
+  useEffect(() => {
+    setHolidaysToAdd(missingHolidayCalculatedDates)
+  }, [missingHolidayCalculatedDates])
 
   function removeFromList(holidayId: string) {
     setHolidaysToAdd((prev) =>
