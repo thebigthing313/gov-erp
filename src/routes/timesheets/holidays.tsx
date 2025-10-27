@@ -9,30 +9,26 @@ import {
 } from '@/components/ui/tooltip'
 import { YearSelector } from '@/components/year-selector'
 import { useHolidays } from '@/db/hooks/use-holidays'
-import { formatDate } from '@/lib/date-fns'
+
 import { createFileRoute } from '@tanstack/react-router'
-import { PrinterIcon, WandSparkles } from 'lucide-react'
-import { Dispatch, SetStateAction, useState } from 'react'
-import { toast } from 'sonner'
+import { Plus, PrinterIcon, WandSparkles } from 'lucide-react'
+import { Dispatch, SetStateAction, useRef, useState } from 'react'
+import { forwardRef } from 'react'
 import { WizardDialog } from './-components/wizard-dialog'
-import { useForm } from '@tanstack/react-form'
-import {
-  FieldDescription,
-  FieldGroup,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
-} from '@/components/ui/field'
-import { ComboBox } from '@/components/form-fields/combo-box'
-import { FormField } from '@/components/form-fields/form-field'
-import { DateInput } from '@/components/form-fields/date-input'
+import { formatDate } from '@/lib/date-fns'
+import { AddNewHolidayForm } from './-components/new-holiday-form'
+import { PrintLayout } from '@/components/layout/print/print-layout'
+import { useReactToPrint } from 'react-to-print'
 
 export const Route = createFileRoute('/timesheets/holidays')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const contentRef = useRef<HTMLDivElement>(null)
+  const reactToPrintFn = useReactToPrint({ contentRef })
   const [isWizardOpen, setIsWizardOpen] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(false)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const { holidayDatesByYear } = useHolidays(currentYear)
 
@@ -49,13 +45,10 @@ function RouteComponent() {
             className="w-48"
           />
           <HolidayWizardButton setIsWizardOpen={setIsWizardOpen} />
-          <PrintButton />
+          <AddNewHolidayFormButton setIsFormOpen={setIsFormOpen} />
+          <PrintButton onClick={reactToPrintFn} />
         </ButtonGroup>
       </nav>
-      <AddNewHolidayForm
-        className="rounded-md border p-2 bg-accent max-w-lg"
-        year={currentYear}
-      />
       <div className="flex flex-row flex-wrap gap-0">
         {holidays.map((holiday, index) => {
           const formattedDate = formatDate(holiday.holiday_date, {
@@ -67,7 +60,7 @@ function RouteComponent() {
           return (
             <HolidayCard
               index={index + 1}
-              key={holiday.holiday_id}
+              key={holiday.id}
               title={holiday.name}
               description={formattedDate}
               className="min-w-xs not-odd:bg-muted/50"
@@ -80,106 +73,14 @@ function RouteComponent() {
         open={isWizardOpen}
         onOpenChange={setIsWizardOpen}
       />
-    </div>
-  )
-}
-
-interface AddNewHolidayFormProps {
-  year: number
-  className?: string
-}
-
-function AddNewHolidayForm({ year, className }: AddNewHolidayFormProps) {
-  const { holidaysAlphabetical, holidayDatesByYear, holiday_dates } =
-    useHolidays(year)
-  const holidays = holidayDatesByYear.data
-
-  const comboboxItems = holidaysAlphabetical.data.map((holiday) => ({
-    label: holiday.name, // Display name (e.g., "Christmas Day")
-    value: holiday.id, // Unique ID (e.g., "christmas")
-  }))
-
-  const form = useForm({
-    defaultValues: {
-      holiday_id: '',
-      holiday_date: undefined as Date | undefined,
-    },
-    onSubmit: async ({ value }) => {
-      //check if holiday and holiday_date already exist
-      const existingHoliday = holidays.find(
-        (date) =>
-          date.holiday_id === value.holiday_id &&
-          date.holiday_date === value.holiday_date,
-      )
-      //if so, notify user
-      if (existingHoliday) {
-        toast.warning('Holiday date is already in the schedule')
-      } else {
-        //if not, insert holiday_date
-        holiday_dates.insert({
-          id: crypto.randomUUID().toString(),
-          holiday_id: value.holiday_id,
-          holiday_date: value.holiday_date!,
-        } as any)
-        // reset form
-        form.reset()
-      }
-    },
-  })
-  return (
-    <div className={className}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          form.handleSubmit()
-        }}
-      >
-        <FieldSet className="gap-2">
-          <FieldLegend>New Holiday</FieldLegend>
-          <FieldDescription>
-            Add a new holiday to the schedule.
-          </FieldDescription>
-          <FieldSeparator />
-          <FieldGroup>
-            <form.Field
-              name="holiday_id"
-              children={(field) => {
-                return (
-                  <FormField
-                    label="Holiday"
-                    htmlFor={field.name}
-                    errors={field.state.meta.errors}
-                  >
-                    <ComboBox
-                      value={field.state.value}
-                      onChange={(newValue) => field.handleChange(newValue)}
-                      items={comboboxItems}
-                    />
-                  </FormField>
-                )
-              }}
-            />
-            <form.Field
-              name="holiday_date"
-              children={(field) => {
-                return (
-                  <FormField
-                    label="Holiday Date"
-                    htmlFor={field.name}
-                    errors={field.state.meta.errors}
-                  >
-                    <DateInput
-                      value={field.state.value}
-                      onChange={(newValue) => field.handleChange(newValue)}
-                    />
-                  </FormField>
-                )
-              }}
-            />
-          </FieldGroup>
-        </FieldSet>
-      </form>
+      <AddNewHolidayForm
+        year={currentYear}
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+      />
+      <div className="hidden">
+        <PrintableHolidaySchedule ref={contentRef} year={currentYear} />
+      </div>
     </div>
   )
 }
@@ -206,11 +107,33 @@ function HolidayWizardButton({
   )
 }
 
-function PrintButton() {
+function AddNewHolidayFormButton({
+  setIsFormOpen,
+}: {
+  setIsFormOpen: Dispatch<SetStateAction<boolean>>
+}) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button type="button" variant="outline" size="icon">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => setIsFormOpen(true)}
+        >
+          <Plus />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Add New Holiday</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function PrintButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button type="button" variant="outline" size="icon" onClick={onClick}>
           <PrinterIcon />
         </Button>
       </TooltipTrigger>
@@ -218,3 +141,43 @@ function PrintButton() {
     </Tooltip>
   )
 }
+
+const PrintableHolidaySchedule = forwardRef<HTMLDivElement, { year: number }>(
+  ({ year }, ref) => {
+    const { holidayDatesByYear } = useHolidays(year)
+    const holidays = holidayDatesByYear.data
+
+    return (
+      <PrintLayout ref={ref}>
+        <div className="flex flex-col items-center">
+          <div className="text-xl font-semibold mb-2">
+            {year} Holiday Schedule
+          </div>
+          <div className="tracking-tighter">
+            If a holiday falls on a Saturday, it will be observed on the
+            preceding Monday.
+          </div>
+          <div className="tracking-tighter mb-2">
+            If a holiday falls on a Sunday, it will be observed on the following
+            Monday.
+          </div>
+          <div className="flex flex-col gap-1">
+            {holidays.map((holiday) => (
+              <div key={holiday.id} className="grid grid-cols-2">
+                <div className="font-semibold">{holiday.name}</div>
+                <div>
+                  {formatDate(holiday.holiday_date, {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    weekday: 'long',
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </PrintLayout>
+    )
+  },
+)
