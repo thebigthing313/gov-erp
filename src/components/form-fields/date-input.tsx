@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { formatDate } from '@/lib/date-fns'
 
 /**
  * Props for the DateInput component.
@@ -48,17 +49,22 @@ export function DateInput({
             id="date"
             className="w-full justify-between font-normal"
           >
-            {value ? value.toLocaleDateString() : placeholder}
+            {value ? formatDate(value) : placeholder}
             <ChevronDownIcon />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
           <Calendar
+            timeZone="UTC"
             mode="single"
             selected={value}
             captionLayout="dropdown"
             onSelect={(date) => {
-              onChange?.(date)
+              if (date) {
+                onChange?.(date)
+              } else {
+                onChange?.(undefined)
+              }
               setOpen(false)
             }}
           />
