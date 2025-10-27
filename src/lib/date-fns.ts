@@ -52,3 +52,7 @@ export const getDateRange = (startString: string, endString: string) => {
 export function getUTCDate(year: number, month: number, day: number): Date {
     return new Date(Date.UTC(year, month, day));
 }
+
+export function areDatesEqual(date1: Date, date2: Date): boolean {
+    return date1.getTime() === date2.getTime();
+}
