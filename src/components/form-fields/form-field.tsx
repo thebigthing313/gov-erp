@@ -72,7 +72,9 @@ export function FormField({
         unwrappedContent
       )}
       {children}
-      <FieldError className="text-xs tracking-tight" errors={errors} />
+      {errors && (
+        <FieldError className="text-xs tracking-tight" errors={errors} />
+      )}
     </Field>
   )
 }
