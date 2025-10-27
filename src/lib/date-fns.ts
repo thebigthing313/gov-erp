@@ -48,3 +48,7 @@ export const getDateRange = (startString: string, endString: string) => {
 
     return dateRange;
 };
+
+export function getUTCDate(year: number, month: number, day: number): Date {
+    return new Date(Date.UTC(year, month, day));
+}
