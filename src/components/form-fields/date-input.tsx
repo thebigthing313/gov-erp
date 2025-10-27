@@ -17,6 +17,9 @@ import { formatDate } from '@/lib/date-fns'
  * Props for the DateInput component.
  */
 interface DateInputProps {
+  startDate?: Date
+  endDate?: Date
+  layout?: 'dropdown' | 'label' | 'dropdown-months' | 'dropdown-years'
   /** The selected date value. */
   value?: Date
   /** Callback when date changes. */
@@ -33,10 +36,14 @@ interface DateInputProps {
  * @returns The rendered date input JSX element.
  */
 export function DateInput({
+  startDate,
+  endDate,
   value,
+  layout = 'dropdown',
   onChange,
   placeholder = 'Select date',
   className,
+  ...props
 }: DateInputProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -55,18 +62,22 @@ export function DateInput({
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
           <Calendar
+            defaultMonth={value}
+            startMonth={startDate}
+            endMonth={endDate}
             timeZone="UTC"
             mode="single"
             selected={value}
-            captionLayout="dropdown"
-            onSelect={(date) => {
-              if (date) {
-                onChange?.(date)
+            captionLayout={layout}
+            onSelect={(selected) => {
+              if (selected) {
+                onChange?.(selected)
               } else {
                 onChange?.(undefined)
               }
               setOpen(false)
             }}
+            {...props}
           />
         </PopoverContent>
       </Popover>
