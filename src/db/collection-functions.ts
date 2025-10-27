@@ -6,17 +6,18 @@ import { toast } from "sonner";
 export async function collectionOnDelete(
     table: Table,
     transaction: TransactionWithMutations<any>,
+    collection: Collection<any, any, any, any, any>,
 ) {
     const localDeletedItemIds = transaction.mutations.map((m) => m.key);
 
     try {
         await dbDelete(table, localDeletedItemIds);
+        localDeletedItemIds.forEach((id) => collection.utils.writeDelete(id));
     } catch (error) {
         toast.error("Failed to delete records.");
         throw error; // rethrow so tanstack db rolls back optimistic changes
     }
 
-    toast.success("Records deleted successfully.");
     return { refetch: false };
 }
 
@@ -34,7 +35,6 @@ export async function collectionOnInsert(
         throw error; // rethrow so tanstack db rolls back optimistic changes
     }
 
-    toast.success("Records created successfully.");
     return { refetch: false };
 }
 
