@@ -12,13 +12,23 @@ import { useHolidays } from '@/db/hooks/use-holidays'
 
 import { createFileRoute } from '@tanstack/react-router'
 import { Plus, PrinterIcon, WandSparkles } from 'lucide-react'
-import { Dispatch, SetStateAction, useRef, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { forwardRef } from 'react'
 import { WizardDialog } from './-components/wizard-dialog'
 import { formatDate } from '@/lib/date-fns'
 import { AddNewHolidayForm } from './-components/new-holiday-form'
 import { PrintLayout } from '@/components/layout/print/print-layout'
 import { useReactToPrint } from 'react-to-print'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 export const Route = createFileRoute('/timesheets/holidays')({
   component: RouteComponent,
@@ -29,10 +39,27 @@ function RouteComponent() {
   const reactToPrintFn = useReactToPrint({ contentRef })
   const [isWizardOpen, setIsWizardOpen] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const [isDeleteApproved, setIsDeleteApproved] = useState(false)
+  const [holidayToDelete, setHolidayToDelete] = useState<string | null>(null)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
-  const { holidayDatesByYear } = useHolidays(currentYear)
+  const { holidayDatesByYear, holiday_dates } = useHolidays(currentYear)
 
   const holidays = holidayDatesByYear.data
+
+  // Effect to handle deletion after confirmation
+  useEffect(() => {
+    if (isDeleteApproved && holidayToDelete) {
+      holiday_dates.delete(holidayToDelete)
+      setHolidayToDelete(null)
+      setIsDeleteApproved(false)
+    }
+  }, [isDeleteApproved, holidayToDelete])
+
+  function handleDelete(holiday_id: string) {
+    setHolidayToDelete(holiday_id)
+    setIsAlertOpen(true)
+  }
 
   return (
     <div className="max-w-3xl flex flex-col gap-2">
@@ -59,11 +86,13 @@ function RouteComponent() {
           })
           return (
             <HolidayCard
+              holiday_id={holiday.id}
               index={index + 1}
               key={holiday.id}
               title={holiday.name}
               description={formattedDate}
               className="min-w-xs not-odd:bg-muted/50"
+              onDelete={(id) => handleDelete(id)}
             />
           )
         })}
@@ -81,6 +110,35 @@ function RouteComponent() {
       <div className="hidden">
         <PrintableHolidaySchedule ref={contentRef} year={currentYear} />
       </div>
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this holiday from the schedule?
+              This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>{' '}
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setHolidayToDelete(null)
+                setIsAlertOpen(false)
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setIsDeleteApproved(true)
+                setIsAlertOpen(false)
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
