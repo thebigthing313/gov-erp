@@ -1,12 +1,14 @@
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
-import { AppRow, Table } from "@/lib/data-types";
-import { dbSelect } from "@/db/db-functions";
+import { Table } from "./data-types";
+import { dbSelectAll } from "@/db/db-functions";
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
 import {
     collectionOnDelete,
     collectionOnInsert,
     collectionOnUpdate,
 } from "./collection-functions";
+import { TransformedRow } from "./data-types";
+import { Tables } from "./supabase-types";
 
 const { queryClient } = TanstackQueryProvider.getContext();
 
@@ -16,8 +18,8 @@ export const DBWholeCollectionOptions = <T extends Table>(
 ) => queryCollectionOptions({
     queryKey: [table as string],
     queryFn: async () => {
-        const data = await dbSelect(table);
-        return data as unknown as AppRow<T>[];
+        const data = await dbSelectAll(table);
+        return data as Array<TransformedRow<Tables<T>>>;
     },
     staleTime,
     queryClient,

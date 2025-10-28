@@ -37,6 +37,6 @@ export const EmployeeTitlesByEmployeeIdCollectionOptions = (
         await collectionOnInsert(table, transaction, collection),
     onUpdate: async ({ transaction, collection }) =>
         await collectionOnUpdate(table, transaction, collection),
-    onDelete: async ({ transaction }) =>
-        await collectionOnDelete(table, transaction),
+    onDelete: async ({ transaction, collection }) =>
+        await collectionOnDelete(table, transaction, collection),
 });

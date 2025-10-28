@@ -6,7 +6,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { Link, LinkProps } from '@tanstack/react-router'
-import { LayoutDashboard, TreePalm } from 'lucide-react'
+import { CalendarDays, LayoutDashboard, TreePalm } from 'lucide-react'
 
 type SidebarItem = {
   icon: React.ReactNode
@@ -23,6 +23,11 @@ const sidebarItems: Array<SidebarItem> = [
     icon: <TreePalm />,
     label: 'Holidays',
     linkProps: { to: '/timesheets/holidays' },
+  },
+  {
+    icon: <CalendarDays />,
+    label: 'Pay Periods',
+    linkProps: { to: '/timesheets/pay-periods' },
   },
 ]
 export function TimesheetsSidebarContent() {

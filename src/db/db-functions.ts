@@ -1,106 +1,20 @@
-import type { AppRow, Insert, Table, Update } from "@/lib/data-types";
+import type { Table, TransformedRow } from "./data-types";
 import { supabase } from "@/db/client";
-
-// ====================================================================
-// FORWARD TRANSFORMATION (Read: string from DB -> Date for App)
-// ====================================================================
-
-/**
- * Transforms string dates/timestamps in a record into native JavaScript Date objects
- * based on the '_at' and '_date' naming conventions.
- * Appends 'T00:00:00.000Z' to date-only fields to ensure UTC interpretation.
- * @param record The raw object returned from Supabase.
- * @returns The object with date fields converted to Date objects.
- */
-export function transformDates<T>(record: T): T {
-    if (!record || typeof record !== "object" || Array.isArray(record)) {
-        return record;
-    }
-
-    const newRecord = { ...record };
-
-    for (const key in newRecord) {
-        if (Object.prototype.hasOwnProperty.call(newRecord, key)) {
-            const value = newRecord[key];
-
-            if (typeof value === "string") {
-                let date: Date | null = null;
-
-                // --- Date-Only Fields ---
-                if (key.endsWith("_date")) {
-                    // Force UTC interpretation by appending the time/zone indicator.
-                    date = new Date(value + "T00:00:00.000Z");
-                } // --- Timestamp Fields ---
-                else if (key.endsWith("_at")) {
-                    // Timestamps already contain the zone, so use them directly.
-                    date = new Date(value);
-                }
-
-                if (date && !isNaN(date.getTime())) {
-                    // @ts-ignore
-                    newRecord[key] = date;
-                }
-            }
-        }
-    }
-
-    // Returns the record with Date objects, asserted as the input type T
-    return newRecord as T;
-}
-
-// ====================================================================
-// REVERSE TRANSFORMATION (Write: Date from App -> string for DB)
-// ====================================================================
-
-/**
- * Transforms native JavaScript Date objects in a record back into ISO 8601 strings
- * for insertion or update in the Supabase API.
- * @param record The object from the application (potentially with Date objects).
- * @returns The object with Date fields converted to ISO strings.
- */
-export function transformDatesToStrings<T>(record: T): T {
-    if (!record || typeof record !== "object" || Array.isArray(record)) {
-        return record;
-    }
-
-    const newRecord = { ...record };
-
-    for (const key in newRecord) {
-        if (Object.prototype.hasOwnProperty.call(newRecord, key)) {
-            const value = newRecord[key];
-
-            // Check if the value is a native Date object
-            if (value instanceof Date) {
-                // @ts-ignore - TS ignores the potential Date assignment error here
-                newRecord[key] = value.toISOString();
-            }
-        }
-    }
-
-    // Returns the record with string dates, asserted as the input type T
-    return newRecord as T;
-}
-
-// ====================================================================
-// DATABASE API FUNCTIONS
-// ====================================================================
+import { transformDatesApptoDB, transformDatesDBtoApp } from "./utils";
+import { Tables } from "./supabase-types";
 
 /**
  * Fetches data from a Supabase table and transforms date strings to Date objects.
  * @returns A promise of an array of records with application-friendly Date types.
  */
-export async function dbSelect<T extends Table>(
+export async function dbSelectAll<T extends Table>(
     table: T,
-    query: string = "*",
-): Promise<AppRow<T>[]> {
-    const { data, error } = await supabase.from(table).select(query);
+): Promise<Array<TransformedRow<Tables<T>>>> {
+    const { data, error } = await supabase.from(table).select("*");
     if (error) throw error;
+    const castedData = data as Array<Tables<T>>;
 
-    // FORWARD transformation: string -> Date
-    const transformedData = (data ?? []).map((item) => transformDates(item));
-
-    // Assert to the correct AppRow type (with Date objects)
-    return transformedData as AppRow<T>[];
+    return castedData.map(transformDatesDBtoApp);
 }
 
 /**
@@ -110,21 +24,21 @@ export async function dbSelect<T extends Table>(
  */
 export async function dbInsert<T extends Table>(
     table: T,
-    items: Array<Insert<T>>,
-): Promise<AppRow<T>[]> {
-    // REVERSE transformation: Date -> string for API submission
-    const itemsToInsert = items.map((item) => transformDatesToStrings(item));
+    items: Array<Partial<TransformedRow<Tables<T>>>>,
+): Promise<Array<TransformedRow<Tables<T>>>> {
+    const itemsToInsert = items.map((item) => transformDatesApptoDB(item));
 
     const { data, error } = await supabase.from(table).insert(
         itemsToInsert as any,
-    ).select();
+    ).select("*");
+
+    const castedData = data as Array<Tables<T>>;
+
     if (error) throw error;
 
-    // FORWARD transformation: string -> Date for application consumption
-    const transformedData = (data ?? []).map((item) => transformDates(item));
+    const transformedData = castedData.map(transformDatesDBtoApp);
 
-    // Assert to the correct AppRow type (with Date objects)
-    return transformedData as AppRow<T>[];
+    return transformedData as Array<TransformedRow<Tables<T>>>;
 }
 
 /**
@@ -133,13 +47,15 @@ export async function dbInsert<T extends Table>(
  */
 export async function dbUpdate<T extends Table>(
     table: T,
-    items: Array<{ id: string; changes: Update<T> }>,
-): Promise<Array<{ data: AppRow<T>[] | null; error: any }>> {
+    items: Array<{ id: string; changes: Partial<TransformedRow<Tables<T>>> }>,
+): Promise<Array<{ data: TransformedRow<Tables<T>> | null; error: any }>> {
     const persistUpdate = async (
-        { id, changes }: { id: string; changes: Update<T> },
+        { id, changes }: {
+            id: string;
+            changes: Partial<TransformedRow<Tables<T>>>;
+        },
     ) => {
-        // REVERSE transformation: Convert incoming Date objects to ISO strings
-        const changesToUpdate = transformDatesToStrings(changes);
+        const changesToUpdate = transformDatesApptoDB(changes);
 
         const { data, error } = await supabase.from(table)
             .update(changesToUpdate as any)
@@ -150,18 +66,19 @@ export async function dbUpdate<T extends Table>(
             return { data: null, error };
         }
 
-        // FORWARD transformation: Convert returned ISO strings to Date objects
-        const transformedData = (data ?? []).map((item) =>
-            transformDates(item)
-        );
+        const castedData = data as Array<Tables<T>>;
 
-        // Return the correctly typed, transformed data
-        return { data: transformedData as AppRow<T>[], error: null };
+        const transformedData = castedData.map(transformDatesDBtoApp);
+
+        return {
+            data: transformedData as TransformedRow<Tables<T>>,
+            error: null,
+        };
     };
 
     // Use Promise.allSettled to ensure all updates complete without halting the entire process
     const results = await Promise.allSettled(
-        items.map((item) => persistUpdate(item)),
+        items.map(persistUpdate),
     );
 
     // Map the settled results to the final desired array format {data, error}

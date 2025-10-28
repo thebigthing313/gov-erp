@@ -40,9 +40,10 @@ export const TimesheetEmployeesByEmployeeYearCollectionOptions = (
     },
     queryClient,
     getKey: (item) => item.id,
-    onInsert: ({ transaction, collection }) =>
-        collectionOnInsert(table, transaction, collection),
-    onUpdate: ({ transaction, collection }) =>
-        collectionOnUpdate(table, transaction, collection),
-    onDelete: ({ transaction }) => collectionOnDelete(table, transaction),
+    onInsert: async ({ transaction, collection }) =>
+        await collectionOnInsert(table, transaction, collection),
+    onUpdate: async ({ transaction, collection }) =>
+        await collectionOnUpdate(table, transaction, collection),
+    onDelete: async ({ transaction, collection }) =>
+        await collectionOnDelete(table, transaction, collection),
 });

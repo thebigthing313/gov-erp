@@ -1,6 +1,6 @@
 import { Collection, TransactionWithMutations } from "@tanstack/react-db";
 import { dbDelete, dbInsert, dbUpdate } from "./db-functions";
-import { Table } from "@/lib/data-types";
+import { Table } from "./data-types";
 import { toast } from "sonner";
 
 export async function collectionOnDelete(
@@ -66,9 +66,9 @@ export async function collectionOnUpdate(
 
             // Granular Rollback: Upsert the original (pre-optimistic) data.
             collection.utils.writeUpsert(mutation.original);
-        } else if (response.data && response.data.length > 0) {
+        } else if (response.data) {
             // response.data is an array (from .select()), but should contain one row for an update
-            collection.utils.writeUpsert(response.data[0]);
+            collection.utils.writeUpsert(response.data);
         }
     });
     if (hasFailure) {
