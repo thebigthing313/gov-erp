@@ -8,7 +8,7 @@ import {
     ZodEmployeesUpdateToDbType,
 } from "../schemas/employees";
 
-export const Employees = createSupabaseCollection<
+export const employees = createSupabaseCollection<
     ZodEmployeesRowType,
     ZodEmployeesInsertToDbType,
     ZodEmployeesUpdateToDbType
