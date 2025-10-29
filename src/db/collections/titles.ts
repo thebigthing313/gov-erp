@@ -1,6 +1,6 @@
 import { createCollection } from "@tanstack/react-db";
 import { DBWholeCollectionOptions } from "../whole-collections";
 
-export const titlesCollection = createCollection(
+export const titles = createCollection(
     DBWholeCollectionOptions("titles", Infinity),
 );
