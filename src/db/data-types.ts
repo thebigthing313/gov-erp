@@ -1,27 +1,35 @@
-import { Database, Tables } from "@/db/supabase-types";
+import type {
+    Database,
+    Tables,
+    TablesInsert,
+    TablesUpdate,
+} from "./supabase-types";
+
+type TransformDate<U> = U extends string ? Date
+    : U extends string | null ? Date | null
+    : U extends string | undefined ? Date | undefined
+    : U extends string | null | undefined ? Date | null | undefined
+    : U;
 
 export type Table = keyof Database["public"]["Tables"];
 
-export type TransformedRow<T> = {
-    [K in keyof T]:
-        // Check if the key ends with '_at' or '_date' AND the original type is string
-        K extends `${string}_at` | `${string}_date`
-            ? T[K] extends string ? Date : T[K] // If it matches and is a string, make it Date
-            : T[K]; // Otherwise, keep the original type
+export type Row<T extends Table> = {
+    [K in keyof Tables<T>]: K extends `${string}_at` | `${string}_date`
+        ? TransformDate<Tables<T>[K]>
+        : Tables<T>[K];
+};
+export type InsertRow<T extends Table> = {
+    [K in keyof TablesInsert<T>]: K extends `${string}_at` | `${string}_date`
+        ? TransformDate<TablesInsert<T>[K]>
+        : TablesInsert<T>[K];
+};
+export type UpdateRow<T extends Table> = {
+    [K in keyof TablesUpdate<T>]: K extends `${string}_at` | `${string}_date`
+        ? TransformDate<TablesUpdate<T>[K]>
+        : TablesUpdate<T>[K];
 };
 
-export type Employee = TransformedRow<Tables<"employees">>;
-export type EmployeeTitle = TransformedRow<Tables<"employee_titles">>;
-export type Holiday = TransformedRow<Tables<"holidays">>;
-export type HolidayDates = TransformedRow<Tables<"holiday_dates">>;
-export type PayPeriod = TransformedRow<Tables<"pay_periods">>;
-export type Permission = TransformedRow<Tables<"permissions">>;
-export type StartingBalance = TransformedRow<Tables<"starting_balances">>;
-export type TimeType = TransformedRow<Tables<"time_types">>;
-export type Timesheet = TransformedRow<Tables<"timesheets">>;
-export type TimesheetEmployee = TransformedRow<Tables<"timesheet_employees">>;
-export type TimesheetEmployeeTime = TransformedRow<
-    Tables<"timesheet_employee_times">
->;
-export type Title = TransformedRow<Tables<"titles">>;
-export type UserPermission = TransformedRow<Tables<"user_permissions">>;
+export type AssertEqual<T, Expected> = T extends Expected
+    ? Expected extends T ? true
+    : false
+    : false;
