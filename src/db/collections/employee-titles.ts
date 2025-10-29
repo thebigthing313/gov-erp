@@ -1,47 +1,75 @@
-import { createCollection } from "@tanstack/react-db";
-import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
-import { queryCollectionOptions } from "@tanstack/query-db-collection";
-import { EmployeeTitle, Table } from "../data-types";
+import { Collection } from "@tanstack/react-db";
+import { Table } from "../data-types";
+import { createParameterizedSupabaseCollectionFactory } from "./collection-factory";
 import { supabase } from "../client";
-import { transformDatesDBtoApp } from "../utils";
 import {
-    collectionOnDelete,
-    collectionOnInsert,
-    collectionOnUpdate,
-} from "../collection-functions";
+    ZodEmployeeTitlesInsertToDb,
+    ZodEmployeeTitlesInsertType,
+    ZodEmployeeTitlesRow,
+    ZodEmployeeTitlesRowType,
+    ZodEmployeeTitlesUpdateToDb,
+    ZodEmployeeTitlesUpdateType,
+} from "../schemas/employee_titles";
 
-type CollectionType = ReturnType<typeof createCollection>;
-
-const cache = new Map<string, CollectionType>();
+// Local cache to store collection instances (one per employee_id)
+const cache = new Map<
+    string,
+    Collection<ZodEmployeeTitlesRowType, string | number>
+>();
 const table: Table = "employee_titles";
 
-const { queryClient } = TanstackQueryProvider.getContext();
+// 1. Create the factory function for the employee_titles table
+// The factory will return the function (employee_id) => Collection
+const employeeTitlesCollectionFactory =
+    createParameterizedSupabaseCollectionFactory<
+        [employee_id: string], // TParams: The required parameter
+        ZodEmployeeTitlesRowType,
+        ZodEmployeeTitlesInsertType,
+        ZodEmployeeTitlesUpdateType
+    >(
+        table,
+        {
+            rowSchema: ZodEmployeeTitlesRow,
+            insertSchema: ZodEmployeeTitlesInsertToDb,
+            updateSchema: ZodEmployeeTitlesUpdateToDb,
+        },
+        // Custom query function that uses the parameter
+        async (
+            [employee_id],
+            // The context is available but not strictly needed here
+            // ctx
+        ) => {
+            // This query fetches data filtered by the provided employee_id
+            const { data, error } = await supabase
+                .from(table)
+                .select("*")
+                .eq("employee_id", employee_id);
 
-export const employee_titles = (employee_id: string) => {
-    if (!cache.has(employee_id)) {
-        const collection = createCollection(queryCollectionOptions({
-            queryKey: [table, "employee_id", employee_id],
-            queryFn: async () => {
-                const { data, error } = await supabase.from(table).select("*")
-                    .eq("employee_id", employee_id);
+            if (error) throw error;
 
-                if (error) throw error;
+            const parsedData = data.map((item) =>
+                ZodEmployeeTitlesRow.parse(item)
+            );
 
-                const transformedData = data.map(transformDatesDBtoApp);
-
-                return transformedData as unknown as Array<EmployeeTitle>;
-            },
-            queryClient,
+            // Note: Zod parsing for transformation (DB string -> App Date)
+            // will be handled by the factory's internal logic using EmployeeTitlesRowSchema.parse()
+            return parsedData as ZodEmployeeTitlesRowType[];
+        },
+        // Configuration options (passed to the underlying useQuery hook)
+        {
             staleTime: 1000 * 60 * 60, // 1 hour
-            getKey: (item) => item.id,
-            onInsert: async ({ transaction, collection }) =>
-                await collectionOnInsert(table, transaction, collection),
-            onUpdate: async ({ transaction, collection }) =>
-                await collectionOnUpdate(table, transaction, collection),
-            onDelete: async ({ transaction, collection }) =>
-                await collectionOnDelete(table, transaction, collection),
-        }));
+        },
+    );
 
+// 2. Export the public function that manages caching and returns the collection
+export const employee_titles = (employee_id: string) => {
+    let collection = cache.get(employee_id);
+
+    if (!collection) {
+        // Create the collection instance by calling the factory result with the parameter
+        collection = employeeTitlesCollectionFactory(employee_id);
+
+        // Add cleanup logic to remove the collection from the cache when TanStack DB flags it
         collection.on("status:change", ({ status }) => {
             if (status === "cleaned-up") {
                 cache.delete(employee_id);
@@ -50,8 +78,8 @@ export const employee_titles = (employee_id: string) => {
 
         cache.set(
             employee_id,
-            collection as unknown as CollectionType,
+            collection,
         );
     }
-    return cache.get(employee_id)!;
+    return collection;
 };
