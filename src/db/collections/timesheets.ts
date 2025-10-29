@@ -43,7 +43,7 @@ export const timesheets = (year: number) => {
                 return transformedData as Array<Timesheet>;
             },
             queryClient,
-            staleTime: 1000 * 60 * 30, // 5 minutes
+            staleTime: 1000 * 60 * 10, // 10 minutes
             getKey: (item) => item.id,
             onInsert: async ({ transaction, collection }) =>
                 await collectionOnInsert(table, transaction, collection),
