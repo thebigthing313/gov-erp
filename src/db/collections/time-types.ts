@@ -1,7 +1,25 @@
-import { createCollection } from "@tanstack/react-db";
-import { TimeType } from "../data-types";
-import { DBWholeCollectionOptions } from "../whole-collections";
+import { createSupabaseCollection } from "./collection-factory";
+import {
+    ZodTimeTypesInsertToDb,
+    ZodTimeTypesInsertToDbType,
+    ZodTimeTypesRow,
+    ZodTimeTypesRowType,
+    ZodTimeTypesUpdateToDb,
+    ZodTimeTypesUpdateToDbType,
+} from "../schemas/time_types";
 
-export const time_types = createCollection<TimeType>(
-    DBWholeCollectionOptions("time_types", Infinity),
+export const TimeTypes = createSupabaseCollection<
+    ZodTimeTypesRowType,
+    ZodTimeTypesInsertToDbType,
+    ZodTimeTypesUpdateToDbType
+>(
+    "time_types",
+    {
+        rowSchema: ZodTimeTypesRow,
+        insertSchema: ZodTimeTypesInsertToDb,
+        updateSchema: ZodTimeTypesUpdateToDb,
+    },
+    {
+        staleTime: 1000 * 60 * 60,
+    },
 );

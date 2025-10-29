@@ -1,6 +1,25 @@
-import { createCollection } from "@tanstack/react-db";
-import { DBWholeCollectionOptions } from "../whole-collections";
+import { createSupabaseCollection } from "./collection-factory";
+import {
+    ZodHolidaysInsertToDb,
+    ZodHolidaysInsertToDbType,
+    ZodHolidaysRow,
+    ZodHolidaysRowType,
+    ZodHolidaysUpdateToDb,
+    ZodHolidaysUpdateToDbType,
+} from "../schemas/holidays";
 
-export const holidays = createCollection(
-    DBWholeCollectionOptions("holidays", Infinity),
+export const holidays = createSupabaseCollection<
+    ZodHolidaysRowType,
+    ZodHolidaysInsertToDbType,
+    ZodHolidaysUpdateToDbType
+>(
+    "holidays",
+    {
+        rowSchema: ZodHolidaysRow,
+        insertSchema: ZodHolidaysInsertToDb,
+        updateSchema: ZodHolidaysUpdateToDb,
+    },
+    {
+        staleTime: Infinity,
+    },
 );
