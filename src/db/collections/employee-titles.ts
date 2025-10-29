@@ -1,7 +1,7 @@
 import { createCollection } from "@tanstack/react-db";
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
-import { Table, TimesheetEmployee } from "../data-types";
+import { EmployeeTitle, Table } from "../data-types";
 import { supabase } from "../client";
 import { transformDatesDBtoApp } from "../utils";
 import {
@@ -12,35 +12,27 @@ import {
 
 type CollectionType = ReturnType<typeof createCollection>;
 
-type MapKey = { year: number; employee_id: string };
-
-const cache = new Map<MapKey, CollectionType>();
-const table: Table = "timesheet_employees";
+const cache = new Map<string, CollectionType>();
+const table: Table = "employee_titles";
 
 const { queryClient } = TanstackQueryProvider.getContext();
 
-export const timesheet_employees = ({ year, employee_id }: MapKey) => {
-    if (!cache.has({ year, employee_id })) {
+export const employee_titles = (employee_id: string) => {
+    if (!cache.has(employee_id)) {
         const collection = createCollection(queryCollectionOptions({
-            queryKey: [table, "year", year, "employee_id", employee_id],
+            queryKey: [table, "employee_id", employee_id],
             queryFn: async () => {
-                const { data, error } = await supabase.from(table).select(
-                    "*, timesheets(pay_periods(payroll_year))",
-                ).eq(
-                    "pay_periods.payroll_year",
-                    year,
-                ).eq("employee_id", employee_id);
+                const { data, error } = await supabase.from(table).select("*")
+                    .eq("employee_id", employee_id);
+
                 if (error) throw error;
-                const strippedData = data.map((item) => {
-                    const { timesheets, ...rest } = item;
-                    return rest;
-                });
 
-                const transformedData = strippedData.map(transformDatesDBtoApp);
+                const transformedData = data.map(transformDatesDBtoApp);
 
-                return transformedData as Array<TimesheetEmployee>;
+                return transformedData as unknown as Array<EmployeeTitle>;
             },
             queryClient,
+            staleTime: 1000 * 60 * 60, // 1 hour
             getKey: (item) => item.id,
             onInsert: async ({ transaction, collection }) =>
                 await collectionOnInsert(table, transaction, collection),
@@ -52,14 +44,14 @@ export const timesheet_employees = ({ year, employee_id }: MapKey) => {
 
         collection.on("status:change", ({ status }) => {
             if (status === "cleaned-up") {
-                cache.delete({ year, employee_id });
+                cache.delete(employee_id);
             }
         });
 
         cache.set(
-            { year, employee_id },
+            employee_id,
             collection as unknown as CollectionType,
         );
     }
-    return cache.get({ year, employee_id })!;
+    return cache.get(employee_id)!;
 };
