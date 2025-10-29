@@ -1,65 +1,95 @@
-import { createCollection } from "@tanstack/react-db";
-import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
-import { queryCollectionOptions } from "@tanstack/query-db-collection";
-import { Table, TimesheetEmployee } from "../data-types";
+import { Collection } from "@tanstack/react-db";
+import { Table } from "../data-types";
+import { createParameterizedSupabaseCollectionFactory } from "./collection-factory";
 import { supabase } from "../client";
-import { transformDatesDBtoApp } from "../utils";
 import {
-    collectionOnDelete,
-    collectionOnInsert,
-    collectionOnUpdate,
-} from "../collection-functions";
+    ZodTimesheetEmployeesInsertToDb,
+    ZodTimesheetEmployeesInsertType,
+    ZodTimesheetEmployeesRow,
+    ZodTimesheetEmployeesRowType,
+    ZodTimesheetEmployeesUpdateToDb,
+    ZodTimesheetEmployeesUpdateType,
+} from "../schemas/timesheet_employees";
+import { serializeKey } from "../utils";
 
-type CollectionType = ReturnType<typeof createCollection>;
-
+// Defines the composite key structure used in the public function signature
 type MapKey = { year: number; employee_id: string };
 
-const cache = new Map<MapKey, CollectionType>();
+// Local cache uses the serialized string as its key
+const cache = new Map<
+    string,
+    Collection<ZodTimesheetEmployeesRowType, string | number>
+>();
 const table: Table = "timesheet_employees";
 
-const { queryClient } = TanstackQueryProvider.getContext();
-
-export const timesheet_employees = ({ year, employee_id }: MapKey) => {
-    if (!cache.has({ year, employee_id })) {
-        const collection = createCollection(queryCollectionOptions({
-            queryKey: [table, "year", year, "employee_id", employee_id],
-            queryFn: async () => {
-                const { data, error } = await supabase.from(table).select(
+// 1. Create the factory function for the timesheet_employees table
+const timesheetEmployeesCollectionFactory =
+    createParameterizedSupabaseCollectionFactory<
+        [year: number, employee_id: string], // TParams: The required parameter
+        ZodTimesheetEmployeesRowType,
+        ZodTimesheetEmployeesInsertType,
+        ZodTimesheetEmployeesUpdateType
+    >(
+        table,
+        {
+            rowSchema: ZodTimesheetEmployeesRow,
+            insertSchema: ZodTimesheetEmployeesInsertToDb,
+            updateSchema: ZodTimesheetEmployeesUpdateToDb,
+        },
+        // Custom query function that uses the parameter
+        async (
+            year,
+            employee_id,
+        ) => {
+            const { data, error } = await supabase.from("timesheet_employees")
+                .select(
                     "*, timesheets(pay_periods(payroll_year))",
                 ).eq(
                     "pay_periods.payroll_year",
                     year,
                 ).eq("employee_id", employee_id);
-                if (error) throw error;
-                const strippedData = data.map((item) => {
-                    const { timesheets, ...rest } = item;
-                    return rest;
-                });
+            if (error) throw error;
 
-                const transformedData = strippedData.map(transformDatesDBtoApp);
+            const strippedData = data.map((item) => {
+                const { timesheets, ...rest } = item;
+                return rest;
+            });
 
-                return transformedData as Array<TimesheetEmployee>;
-            },
-            queryClient,
-            getKey: (item) => item.id,
-            onInsert: async ({ transaction, collection }) =>
-                await collectionOnInsert(table, transaction, collection),
-            onUpdate: async ({ transaction, collection }) =>
-                await collectionOnUpdate(table, transaction, collection),
-            onDelete: async ({ transaction, collection }) =>
-                await collectionOnDelete(table, transaction, collection),
-        }));
+            const parsedData = strippedData.map((item) =>
+                ZodTimesheetEmployeesRow.parse(item)
+            );
 
+            return parsedData as ZodTimesheetEmployeesRowType[];
+        },
+        // Configuration options (passed to the underlying useQuery hook)
+        {
+            staleTime: 1000 * 60 * 60, // 1 hour
+        },
+    );
+
+// 2. Export the public function that manages caching and returns the collection
+export const timesheet_employees = ({ year, employee_id }: MapKey) => {
+    // Generate the deterministic string key
+    const key = serializeKey({ year, employee_id });
+
+    let collection = cache.get(key);
+
+    if (!collection) {
+        // Create the collection instance by calling the factory result with the parameters
+        collection = timesheetEmployeesCollectionFactory(year, employee_id);
+
+        // Add cleanup logic to remove the collection from the cache when TanStack DB flags it
         collection.on("status:change", ({ status }) => {
             if (status === "cleaned-up") {
-                cache.delete({ year, employee_id });
+                // Ensure the cleanup logic uses the correct serialized key
+                cache.delete(key);
             }
         });
 
         cache.set(
-            { year, employee_id },
-            collection as unknown as CollectionType,
+            key, // Set using the serialized string key
+            collection,
         );
     }
-    return cache.get({ year, employee_id })!;
+    return collection;
 };
