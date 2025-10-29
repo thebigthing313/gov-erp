@@ -11,7 +11,9 @@ import {
     collectionOnUpdate,
 } from "../collection-functions";
 
-const cache = new Map<number, ReturnType<typeof createCollection>>();
+type CollectionType = ReturnType<typeof createCollection>;
+
+const cache = new Map<number, CollectionType>();
 const table: Table = "timesheets";
 
 const { queryClient } = TanstackQueryProvider.getContext();
@@ -59,7 +61,7 @@ export const timesheets = (year: number) => {
 
         cache.set(
             year,
-            collection,
+            collection as unknown as CollectionType,
         );
     }
     return cache.get(year)!;
