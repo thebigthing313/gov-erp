@@ -70,8 +70,9 @@ export async function dbUpdate<T extends Table>(
 
         const transformedData = castedData.map(transformDatesDBtoApp);
 
+        // Update returns array but should only have one item
         return {
-            data: transformedData as TransformedRow<Tables<T>>,
+            data: transformedData[0] as TransformedRow<Tables<T>>,
             error: null,
         };
     };
