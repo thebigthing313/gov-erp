@@ -36,16 +36,6 @@ export const Route = createFileRoute('/timesheets')({
   },
   pendingComponent: () => <Spinner />,
   component: RouteComponent,
-  loader: async ({ context }) => {
-    await Promise.all([
-      titlesCollection.preload(),
-      employeesCollection.preload(),
-      getEmployeeTitlesCollection(context.auth.employeeId).preload(),
-      holidaysCollection.preload(),
-      holidayDatesCollection.preload(),
-      getTimesheetsCollection(new Date().getFullYear()).preload(),
-    ])
-  },
 })
 
 function RouteComponent() {

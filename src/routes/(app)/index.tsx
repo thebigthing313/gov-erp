@@ -16,19 +16,24 @@ import { appList } from '@/data/company-app-list'
 import { hasPermission, signOut } from '@/lib/auth'
 import { parsePhoneNumberWithError } from 'libphonenumber-js/min'
 import { useEmployee } from '@/db/hooks/use-employee'
+import { employees } from '@/db/collections/employees'
 
 export const Route = createFileRoute('/(app)/')({
   component: RouteComponent,
+  loader: async () => {
+    await employees.preload()
+  },
 })
 
 function RouteComponent() {
   const { company, auth } = Route.useRouteContext()
   if (!auth.employeeId) return null
 
-  const { query } = useEmployee(auth.employeeId)
-  const employee = query.data[0]
+  const { employee_by_id } = useEmployee(auth.employeeId)
+  const employee = employee_by_id.data[0]
 
   const navigate = useNavigate()
+
   const parsedPhone = parsePhoneNumberWithError(company.phone, {
     defaultCountry: 'US',
   })

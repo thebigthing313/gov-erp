@@ -87,10 +87,10 @@ export function SharedLayoutSidebar({
   employee_id,
   children,
 }: SharedLayoutSidebarProps) {
-  const { query: employeeQuery } = useEmployee(employee_id)
+  const { employee_by_id } = useEmployee(employee_id)
   const { query: titlesQuery } = useEmployeeTitles(employee_id)
 
-  const employee = employeeQuery.data[0]
+  const employee = employee_by_id.data[0]
   const currentTitle = titlesQuery.data[0]
 
   const navigate = useNavigate()
