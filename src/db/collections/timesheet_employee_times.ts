@@ -1,71 +1,75 @@
-import { createCollection } from "@tanstack/react-db";
-import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
-import { queryCollectionOptions } from "@tanstack/query-db-collection";
-import { Table, TimesheetEmployeeTime } from "../data-types";
+import { Collection } from "@tanstack/react-db";
+import { Table } from "../data-types";
 import { supabase } from "../client";
-import { transformDatesDBtoApp } from "../utils";
+import { serializeKey } from "../utils";
 import {
-    collectionOnDelete,
-    collectionOnInsert,
-    collectionOnUpdate,
-} from "../collection-functions";
-
-type CollectionType = ReturnType<typeof createCollection>;
+    ZodTimesheetEmployeeTimesInsertToDb,
+    ZodTimesheetEmployeeTimesInsertType,
+    ZodTimesheetEmployeeTimesRow,
+    ZodTimesheetEmployeeTimesRowType,
+    ZodTimesheetEmployeeTimesUpdateType,
+} from "../schemas/timesheet_employee_times";
+import { createParameterizedSupabaseCollectionFactory } from "./collection-factory";
+import { ZodTimesheetEmployeesUpdateToDb } from "../schemas/timesheet_employees";
 
 type MapKey = { year: number; employee_id: string };
 
-const cache = new Map<MapKey, CollectionType>();
+const cache = new Map<
+    string,
+    Collection<ZodTimesheetEmployeeTimesRowType, string | number>
+>();
+
 const table: Table = "timesheet_employee_times";
 
-const { queryClient } = TanstackQueryProvider.getContext();
+const timesheetEmployeeTimesCollectionFactory =
+    createParameterizedSupabaseCollectionFactory<
+        [year: number, employee_id: string],
+        ZodTimesheetEmployeeTimesRowType,
+        ZodTimesheetEmployeeTimesInsertType,
+        ZodTimesheetEmployeeTimesUpdateType
+    >(
+        table,
+        {
+            rowSchema: ZodTimesheetEmployeeTimesRow,
+            insertSchema: ZodTimesheetEmployeeTimesInsertToDb,
+            updateSchema: ZodTimesheetEmployeesUpdateToDb,
+        },
+        async (year, employee_id) => {
+            const { data, error } = await supabase.from(table).select(
+                "*, timesheet_employees(timesheets(pay_periods(payroll_year)))",
+            ).eq(
+                "pay_periods.payroll_year",
+                year,
+            ).eq("employee_id", employee_id);
+            if (error) throw error;
+            const strippedData = data.map((item) => {
+                const { timesheet_employees, ...rest } = item;
+                return rest;
+            });
+
+            const parsedData = strippedData.map((item) =>
+                ZodTimesheetEmployeeTimesRow.parse(item)
+            );
+
+            return parsedData as Array<ZodTimesheetEmployeeTimesRowType>;
+        },
+        { staleTime: 1000 * 60 * 30 },
+    );
 
 export const timesheet_employees = ({ year, employee_id }: MapKey) => {
-    if (!cache.has({ year, employee_id })) {
-        const collection = createCollection(
-            queryCollectionOptions<TimesheetEmployeeTime>({
-                queryKey: [table, "year", year, "employee_id", employee_id],
-                queryFn: async () => {
-                    const { data, error } = await supabase.from(table).select(
-                        "*, timesheet_employees(timesheets(pay_periods(payroll_year)))",
-                    ).eq(
-                        "pay_periods.payroll_year",
-                        year,
-                    ).eq("employee_id", employee_id);
-                    if (error) throw error;
-                    const strippedData = data.map((item) => {
-                        const { timesheet_employees, ...rest } = item;
-                        return rest;
-                    });
+    const key = serializeKey({ year, employee_id });
+    let collection = cache.get(key);
 
-                    const transformedData = strippedData.map(
-                        transformDatesDBtoApp,
-                    );
-
-                    return transformedData as Array<
-                        TimesheetEmployeeTime
-                    >;
-                },
-                queryClient,
-                getKey: (item) => item.id,
-                onInsert: async ({ transaction, collection }) =>
-                    await collectionOnInsert(table, transaction, collection),
-                onUpdate: async ({ transaction, collection }) =>
-                    await collectionOnUpdate(table, transaction, collection),
-                onDelete: async ({ transaction, collection }) =>
-                    await collectionOnDelete(table, transaction, collection),
-            }),
-        );
+    if (!collection) {
+        collection = timesheetEmployeeTimesCollectionFactory(year, employee_id);
 
         collection.on("status:change", ({ status }) => {
-            if (status === "cleaned-up") {
-                cache.delete({ year, employee_id });
-            }
+            if (
+                status ===
+                    "cleaned-up"
+            ) cache.delete(key);
         });
-
-        cache.set(
-            { year, employee_id },
-            collection as unknown as CollectionType,
-        );
+        cache.set(key, collection);
     }
-    return cache.get({ year, employee_id })!;
+    return collection;
 };
