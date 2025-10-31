@@ -1,6 +1,25 @@
-import { createCollection } from "@tanstack/react-db";
-import { DBWholeCollectionOptions } from "../whole-collections";
+import { createSupabaseCollection } from "./collection-factory";
+import {
+    ZodPayPeriodsInsertToDb,
+    ZodPayPeriodsInsertToDbType,
+    ZodPayPeriodsRow,
+    ZodPayPeriodsRowType,
+    ZodPayPeriodsUpdateToDb,
+    ZodPayPeriodsUpdateToDbType,
+} from "../schemas/pay_periods";
 
-export const pay_periods = createCollection(
-    DBWholeCollectionOptions("pay_periods", Infinity),
+export const PayPeriods = createSupabaseCollection<
+    ZodPayPeriodsRowType,
+    ZodPayPeriodsInsertToDbType,
+    ZodPayPeriodsUpdateToDbType
+>(
+    "pay_periods",
+    {
+        rowSchema: ZodPayPeriodsRow,
+        insertSchema: ZodPayPeriodsInsertToDb,
+        updateSchema: ZodPayPeriodsUpdateToDb,
+    },
+    {
+        staleTime: Infinity,
+    },
 );
