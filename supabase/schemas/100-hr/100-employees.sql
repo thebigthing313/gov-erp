@@ -15,7 +15,7 @@ create table public.employees (
     home_phone text,
     cell_phone text,
     photo_url text,
-    csc_id text,
+    csc_number text,
     pers_membership_number text,
     pers_tier text,
     user_id uuid references auth.users(id),
