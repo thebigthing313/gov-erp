@@ -1,10 +1,10 @@
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import { payPeriodsCollection } from "../collections";
+import { pay_periods } from "../collections/pay-periods";
 
 export function usePayPeriods(year: number) {
-    const query = useLiveQuery(
+    const pay_periods_by_year = useLiveQuery(
         (q) =>
-            q.from({ pay_periods: payPeriodsCollection }).where(
+            q.from({ pay_periods: pay_periods }).where(
                 ({ pay_periods }) => eq(pay_periods.payroll_year, year),
             ).orderBy(
                 ({ pay_periods }) => pay_periods.pay_period_number,
@@ -13,8 +13,7 @@ export function usePayPeriods(year: number) {
         [year],
     );
 
-    return {
-        pay_periods_by_year: query,
-        pay_periods: payPeriodsCollection,
-    };
+    const { data, isLoading, isError } = pay_periods_by_year;
+
+    return { data, isLoading, isError };
 }
