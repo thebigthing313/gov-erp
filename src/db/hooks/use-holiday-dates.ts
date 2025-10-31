@@ -2,7 +2,7 @@ import { and, eq, gte, lte, useLiveQuery } from "@tanstack/react-db";
 import { holidays } from "../collections/holidays";
 import { holiday_dates } from "../collections/holiday-dates";
 
-export function useHolidays(year: number) {
+export function useHolidayDates(year: number) {
     const startOfYear = new Date(year, 0, 1);
     const endOfYear = new Date(year, 11, 31);
 
