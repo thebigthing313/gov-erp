@@ -29,6 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { holiday_dates } from '@/db/collections/holiday-dates'
 
 export const Route = createFileRoute('/timesheets/holidays')({
   component: RouteComponent,
@@ -43,9 +44,14 @@ function RouteComponent() {
   const [isDeleteApproved, setIsDeleteApproved] = useState(false)
   const [holidayToDelete, setHolidayToDelete] = useState<string | null>(null)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
-  const { holidayDatesByYear, holiday_dates } = useHolidays(currentYear)
-
-  const holidays = holidayDatesByYear.data
+  const {
+    data: holiday_dates_by_year,
+    isLoading,
+    isError,
+  } = useHolidays(currentYear)
+  if (isLoading) return <div>Loading...</div>
+  if (isError || !holiday_dates_by_year)
+    return <div>Error loading holidays.</div>
 
   // Effect to handle deletion after confirmation
   useEffect(() => {
@@ -77,8 +83,8 @@ function RouteComponent() {
         </ButtonGroup>
       </nav>
       <div className="flex flex-row flex-wrap gap-0">
-        {holidays.map((holiday, index) => {
-          const formattedDate = formatDate(holiday.holiday_date, {
+        {holiday_dates_by_year.map((holiday_date, index) => {
+          const formattedDate = formatDate(holiday_date.holiday_date, {
             day: 'numeric',
             month: 'long',
             year: 'numeric',
@@ -86,10 +92,10 @@ function RouteComponent() {
           })
           return (
             <HolidayCard
-              holiday_id={holiday.id}
+              holiday_id={holiday_date.id}
               index={index + 1}
-              key={holiday.id}
-              title={holiday.name}
+              key={holiday_date.id}
+              title={holiday_date.holiday.name}
               description={formattedDate}
               className="min-w-xs not-odd:bg-muted/50"
               onDelete={(id) => handleDelete(id)}
@@ -202,8 +208,14 @@ function PrintButton({ onClick }: { onClick: () => void }) {
 
 const PrintableHolidaySchedule = forwardRef<HTMLDivElement, { year: number }>(
   ({ year }, ref) => {
-    const { holidayDatesByYear } = useHolidays(year)
-    const holidays = holidayDatesByYear.data
+    const {
+      data: holiday_dates_by_year,
+      isLoading,
+      isError,
+    } = useHolidays(year)
+    if (isLoading) return <div>Loading...</div>
+    if (isError || !holiday_dates_by_year)
+      return <div>Error loading holidays.</div>
 
     return (
       <PrintLayout ref={ref}>
@@ -220,11 +232,11 @@ const PrintableHolidaySchedule = forwardRef<HTMLDivElement, { year: number }>(
             Monday.
           </div>
           <div className="flex flex-col gap-1">
-            {holidays.map((holiday) => (
-              <div key={holiday.id} className="grid grid-cols-2">
-                <div className="font-semibold">{holiday.name}</div>
+            {holiday_dates_by_year.map((holiday_date) => (
+              <div key={holiday_date.id} className="grid grid-cols-2">
+                <div className="font-semibold">{holiday_date.holiday.name}</div>
                 <div>
-                  {formatDate(holiday.holiday_date, {
+                  {formatDate(holiday_date.holiday_date, {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric',
