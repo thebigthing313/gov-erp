@@ -10,13 +10,18 @@ export const Route = createFileRoute('/timesheets/pay-periods/')({
 
 function RouteComponent() {
   const [year, setYear] = useState(new Date().getFullYear())
-  const { pay_periods_by_year } = usePayPeriods(year)
-  const pay_periods = pay_periods_by_year.data
+  const { data: pay_periods_by_year, isLoading, isError } = usePayPeriods(year)
+  if (isLoading) {
+    return <div>Loading pay periods...</div>
+  }
+  if (isError) {
+    return <div>Error loading pay periods.</div>
+  }
 
   return (
     <div className="flex flex-col gap-2">
       <YearSelector value={year} onChange={(year) => setYear(year)} />
-      {pay_periods.map((pay_period) => {
+      {pay_periods_by_year.map((pay_period) => {
         const cardInfo = {
           id: pay_period.id,
           pay_period_number: pay_period.pay_period_number,
