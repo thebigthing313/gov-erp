@@ -23,7 +23,6 @@ create table public.timesheets (
     modified_by uuid references auth.users(id) on delete set null,
     pay_period_id uuid not null references public.pay_periods(id),
     timesheet_date date unique not null,
-    holiday_date_id uuid references public.holiday_dates(id),
     notes text,
     check (public.verify_timesheet_date(timesheet_date, pay_period_id))
 );
