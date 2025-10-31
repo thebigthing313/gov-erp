@@ -32,11 +32,12 @@ const employeeTitlesCollectionFactory =
         },
         // Custom query function that uses the parameter
         async (
-            [employee_id],
-            // The context is available but not strictly needed here
-            // ctx
+            employee_id,
         ) => {
             // This query fetches data filtered by the provided employee_id
+            console.log(
+                `Fetching employee_titles for employee_id: ${employee_id}`,
+            );
             const { data, error } = await supabase
                 .from(table)
                 .select("*")
@@ -61,7 +62,6 @@ const employeeTitlesCollectionFactory =
 // 2. Export the public function that manages caching and returns the collection
 export const employee_titles = (employee_id: string) => {
     let collection = cache.get(employee_id);
-
     if (!collection) {
         // Create the collection instance by calling the factory result with the parameter
         collection = employeeTitlesCollectionFactory(employee_id);
