@@ -1,3 +1,8 @@
+//---------------------------------------------------------------------------
+// future potential improvements:
+// Parse within factory and custom queryfn should just return raw data?
+// simplify overloads by having separate functions for parameterized and non-parameterized?
+//---------------------------------------------------------------------------
 import { z } from "zod";
 import {
     Collection,
@@ -10,8 +15,8 @@ import {
 } from "@tanstack/query-db-collection";
 import { supabase } from "../client";
 import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
-import { Table } from "../data-types"; // Assuming 'Table' is your Supabase table name union type
-import { QueryKey } from "@tanstack/react-query"; // Import for QueryKey type
+import { Table } from "../data-types";
+import { QueryKey } from "@tanstack/react-query";
 
 const { queryClient } = TanstackQueryProvider.getContext();
 
@@ -31,6 +36,11 @@ const { queryClient } = TanstackQueryProvider.getContext();
 //   ((...params) => Collection) or a non-parameterized Collection instance.
 // - No application logic (transformations) is performed implicitly; parsing is
 //   delegated to the provided Zod schemas and any custom query function.
+//
+// Conventions:
+// - All database tables have an `id` field of type UUID
+// - Updates apply a single changeset to one or multiple IDs
+// - TanStack DB handles rollback when mutation handlers throw
 // ---------------------------------------------------------------------------
 
 // Configuration fields commonly passed to TanStack Query hooks
@@ -41,8 +51,7 @@ interface TanstackQueryConfig {
 }
 
 // Helper type to safely define the core configuration object for the factory
-// FIX: TItem must explicitly extend object here to resolve compilation error 2344
-type FactoryConfig<TItem extends object> =
+type FactoryConfig<TItem extends { id: string }> =
     & Partial<
         Omit<
             & CollectionConfig<TItem, string | number, never, any>
@@ -65,9 +74,14 @@ type FactoryConfig<TItem extends object> =
 //   `createCollection` / TanStack DB hooks while preventing callers from
 //   overriding keys that the factory provides (like queryKey/queryFn/getKey
 //   and the mutation handlers: onInsert/onUpdate/onDelete).
+/// - TItem is constrained to have an `id` field per database convention.
 
 // --- 1. Define the Required Interface for Generics ---
-interface SupabaseCollectionSchemas<TItem extends object, TInsert, TUpdate> {
+interface SupabaseCollectionSchemas<
+    TItem extends { id: string },
+    TInsert,
+    TUpdate,
+> {
     // Schema for the full item (Read/Output, with all server-generated fields)
     rowSchema: z.ZodType<TItem, any, any>;
     // Schema for the client input on Insert (Audit fields are optional/omitted)
@@ -88,7 +102,7 @@ interface SupabaseCollectionSchemas<TItem extends object, TInsert, TUpdate> {
 // Overload 1: Parameterized factory result (custom query function is required)
 export function createParameterizedSupabaseCollectionFactory<
     TParams extends any[],
-    TItem extends object,
+    TItem extends { id: string },
     TInsert extends object,
     TUpdate extends object,
 >(
@@ -100,7 +114,7 @@ export function createParameterizedSupabaseCollectionFactory<
 
 // Overload 2: Non-parameterized factory result (custom query function is required by overload structure)
 export function createParameterizedSupabaseCollectionFactory<
-    TItem extends object,
+    TItem extends { id: string },
     TInsert extends object,
     TUpdate extends object,
 >(
@@ -112,10 +126,10 @@ export function createParameterizedSupabaseCollectionFactory<
 
 // Base Implementation (Handles both parameterized and non-parameterized calls)
 export function createParameterizedSupabaseCollectionFactory<
-    TParams extends any[] = [],
-    TItem extends object = any,
-    TInsert extends object = any,
-    TUpdate extends object = any,
+    TParams extends any[],
+    TItem extends { id: string },
+    TInsert extends object,
+    TUpdate extends object,
 >(
     tableName: Table,
     schemas: SupabaseCollectionSchemas<TItem, TInsert, TUpdate>,
@@ -149,8 +163,12 @@ export function createParameterizedSupabaseCollectionFactory<
         // expected runtime shape.
         finalCustomQueryFn = (async () => {
             const { data, error } = await supabase.from(tableName).select("*");
-            if (error) throw error;
-            // ONLY parse here in the default non-parameterized case
+            if (error) {
+                throw new Error(
+                    `Failed to query ${tableName}: ${error.message}`,
+                    { cause: error },
+                );
+            }
             return data.map((item) => schemas.rowSchema.parse(item));
         }) as (...params: TParams) => Promise<TItem[]>;
     }
@@ -169,9 +187,8 @@ export function createParameterizedSupabaseCollectionFactory<
             queryCollectionOptions<TItem>({
                 queryKey,
                 queryClient,
-                // Generic key extractor - adjust if your tables use a
-                // different primary key field.
-                getKey: (item) => (item as any).id, // Generic key extraction
+                // Extract the `id` field per database convention
+                getKey: (item) => item.id,
                 ...finalConfig,
 
                 // ------------------------------------
@@ -215,10 +232,15 @@ export function createParameterizedSupabaseCollectionFactory<
                             .insert(parsedLocalNewItems)
                             .select("*");
 
-                    if (insertError) throw insertError;
+                    if (insertError) {
+                        throw new Error(
+                            `Failed to insert into ${tableName}: ${insertError.message}`,
+                            { cause: insertError },
+                        );
+                    }
 
-                    // Use the specific rowSchema for final server response confirmation/parsing
-                    const parsedServerNewItems = serverNewItems.map((item) =>
+                    // Per Supabase docs: no error means data is an array (possibly empty)
+                    const parsedServerNewItems = serverNewItems!.map((item) =>
                         rowSchema.parse(item)
                     );
 
@@ -238,15 +260,16 @@ export function createParameterizedSupabaseCollectionFactory<
                 // ------------------------------------
                 //           UPDATE HANDLER
                 // ------------------------------------
-                // Steps:
-                // 1. Collect IDs and the changes from the transaction.
-                // 2. Validate the changes with updateSchema.
-                // 3. Send UPDATE to Supabase using `.update(...).in('id', ids)`
-                // 4. Parse the server response with rowSchema and upsert.
+                // Convention: Apply a single changeset to one or multiple IDs
                 onUpdate: async ({ transaction, collection }) => {
+                    if (transaction.mutations.length === 0) {
+                        return { refetch: false };
+                    }
+
                     const localUpdatedKeys = transaction.mutations.map((m) =>
                         m.key
                     );
+                    // Apply the first mutation's changes to all selected IDs
                     const localChangesToApply =
                         transaction.mutations[0].changes;
 
@@ -261,9 +284,14 @@ export function createParameterizedSupabaseCollectionFactory<
                             .in("id", localUpdatedKeys)
                             .select("*");
 
-                    if (updateError) throw updateError;
+                    if (updateError) {
+                        throw new Error(
+                            `Failed to update ${tableName}: ${updateError.message}`,
+                            { cause: updateError },
+                        );
+                    }
 
-                    const parsedServerUpdatedItems = serverUpdatedItems.map((
+                    const parsedServerUpdatedItems = serverUpdatedItems!.map((
                         item,
                     ) => rowSchema.parse(item));
 
@@ -279,10 +307,6 @@ export function createParameterizedSupabaseCollectionFactory<
                 // ------------------------------------
                 //           DELETE HANDLER
                 // ------------------------------------
-                // Steps:
-                // 1. Collect deleted IDs from the transaction.
-                // 2. Send `.delete().in('id', ids)` to Supabase.
-                // 3. Remove items from local cache.
                 onDelete: async ({ transaction, collection }) => {
                     const localDeletedItemIds = transaction.mutations.map((m) =>
                         m.key
@@ -294,7 +318,12 @@ export function createParameterizedSupabaseCollectionFactory<
                         .delete()
                         .in("id", localDeletedItemIds);
 
-                    if (deleteError) throw deleteError;
+                    if (deleteError) {
+                        throw new Error(
+                            `Failed to delete from ${tableName}: ${deleteError.message}`,
+                            { cause: deleteError },
+                        );
+                    }
 
                     collection.utils.writeBatch(() => {
                         localDeletedItemIds.forEach((id) =>
@@ -305,15 +334,15 @@ export function createParameterizedSupabaseCollectionFactory<
                     return { refetch: false };
                 },
             }),
-        ) as Collection<TItem, string | number>;
+        );
     };
 
-    return collectionCreator as any;
+    return collectionCreator;
 }
 
 // --- 3. The Non-Parameterized Convenience Wrapper ---
 export function createSupabaseCollection<
-    TItem extends object,
+    TItem extends { id: string },
     TInsert extends object,
     TUpdate extends object,
 >(
@@ -321,14 +350,16 @@ export function createSupabaseCollection<
     schemas: SupabaseCollectionSchemas<TItem, TInsert, TUpdate>,
     config: FactoryConfig<TItem>,
 ): Collection<TItem, string | number> {
-    // 1. Define the default queryFn to explicitly match Overload 2's required signature
     const defaultQueryFn = (async () => {
         const { data, error } = await supabase.from(tableName).select("*");
-        if (error) throw error;
+        if (error) {
+            throw new Error(`Failed to query ${tableName}: ${error.message}`, {
+                cause: error,
+            });
+        }
         return data.map((item) => schemas.rowSchema.parse(item));
-    }) as (...params: []) => Promise<TItem[]>; // Enforce [] TParams
+    }) as (...params: []) => Promise<TItem[]>;
 
-    // 2. We now explicitly call the parameterized factory with 4 arguments (matching Overload 2)
     return createParameterizedSupabaseCollectionFactory<
         TItem,
         TInsert,
@@ -336,7 +367,7 @@ export function createSupabaseCollection<
     >(
         tableName,
         schemas,
-        defaultQueryFn, // Argument 3 (The required function for Overload 2)
-        config, // Argument 4 (The config object)
-    )(); // The function is immediately called with no arguments
+        defaultQueryFn,
+        config,
+    )();
 }
