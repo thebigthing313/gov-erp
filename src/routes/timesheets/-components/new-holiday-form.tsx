@@ -2,13 +2,7 @@ import { ComboBox } from '@/components/form-fields/combo-box'
 import { DateInput } from '@/components/form-fields/date-input'
 import { FormField } from '@/components/form-fields/form-field'
 import { SubmitButton } from '@/components/form-fields/submit-button'
-import {
-  FieldDescription,
-  FieldGroup,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
-} from '@/components/ui/field'
+import { FieldGroup, FieldSeparator, FieldSet } from '@/components/ui/field'
 import { useHolidayDates } from '@/db/hooks/use-holiday-dates'
 import { areDatesEqual } from '@/lib/date-fns'
 import { useForm } from '@tanstack/react-form'
