@@ -11,18 +11,15 @@ import {
     ZodEmployeeTitlesUpdateType,
 } from "../schemas/employee_titles";
 
-// Local cache to store collection instances (one per employee_id)
 const cache = new Map<
     string,
     Collection<ZodEmployeeTitlesRowType, string | number>
 >();
 const table: Table = "employee_titles";
 
-// 1. Create the factory function for the employee_titles table
-// The factory will return the function (employee_id) => Collection
 const employeeTitlesCollectionFactory =
     createParameterizedSupabaseCollectionFactory<
-        [employee_id: string], // TParams: The required parameter
+        [employee_id: string],
         ZodEmployeeTitlesRowType,
         ZodEmployeeTitlesInsertType,
         ZodEmployeeTitlesUpdateType
