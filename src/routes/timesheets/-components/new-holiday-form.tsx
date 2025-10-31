@@ -9,7 +9,7 @@ import {
   FieldSeparator,
   FieldSet,
 } from '@/components/ui/field'
-import { useHolidays } from '@/db/hooks/use-holidays'
+import { useHolidayDates } from '@/db/hooks/use-holiday-dates'
 import { areDatesEqual } from '@/lib/date-fns'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
@@ -22,6 +22,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import z from 'zod'
+import { useHolidays } from '@/db/hooks/use-holidays'
+import { holiday_dates } from '@/db/collections/holiday-dates'
 
 interface AddNewHolidayFormProps {
   year: number
@@ -29,16 +31,23 @@ interface AddNewHolidayFormProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function AddNewHolidayForm({
+export default function AddNewHolidayForm({
   year,
   open,
   onOpenChange,
 }: AddNewHolidayFormProps) {
-  const { holidaysAlphabetical, holidayDatesByYear, holiday_dates } =
-    useHolidays(year)
-  const holidays = holidayDatesByYear.data
+  const {
+    data: holidays,
+    isLoading: isLoadingHolidays,
+    isError: isErrorHolidays,
+  } = useHolidays()
+  const {
+    data: holiday_dates_by_year,
+    isLoading: isLoadingHolidayDates,
+    isError: isErrorHolidayDates,
+  } = useHolidayDates(year)
 
-  const comboboxItems = holidaysAlphabetical.data.map((holiday) => ({
+  const comboboxItems = holidays.map((holiday) => ({
     label: holiday.name,
     value: holiday.id,
   }))
@@ -65,10 +74,10 @@ export function AddNewHolidayForm({
         return
       }
 
-      const existingHoliday = holidays.find((date) => {
+      const existingHoliday = holiday_dates_by_year.find((holiday_date) => {
         return (
-          date.holiday_id === value.holiday_id &&
-          areDatesEqual(date.holiday_date, formDate)
+          holiday_date.holiday_id === value.holiday_id &&
+          areDatesEqual(holiday_date.holiday_date, formDate)
         )
       })
 
@@ -86,6 +95,19 @@ export function AddNewHolidayForm({
       }
     },
   })
+
+  if (isLoadingHolidays || isLoadingHolidayDates) {
+    return <div>Loading...</div>
+  }
+  if (
+    isErrorHolidays ||
+    isErrorHolidayDates ||
+    !holidays ||
+    !holiday_dates_by_year
+  ) {
+    return <div>Error loading data.</div>
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -104,10 +126,6 @@ export function AddNewHolidayForm({
           }}
         >
           <FieldSet>
-            <FieldLegend>New Holiday</FieldLegend>
-            <FieldDescription>
-              Add a new holiday to the schedule.
-            </FieldDescription>
             <FieldSeparator />
             <FieldGroup>
               <form.Field
