@@ -6,14 +6,10 @@ export function useEmployee(employee_id: string) {
         (q) =>
             q.from({ employee: employees }).where(({ employee }) =>
                 eq(employee.id, employee_id)
-            ),
+            ).findOne(),
         [employee_id],
     );
 
-    const data = employee_by_id.data?.length === 0
-        ? null
-        : employee_by_id.data[0];
-
-    const { isLoading, isError } = employee_by_id;
-    return { data, isLoading, isError };
+    const { data, collection, isLoading, isError } = employee_by_id;
+    return { data, collection, isLoading, isError };
 }

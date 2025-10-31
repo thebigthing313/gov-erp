@@ -3,10 +3,9 @@ import { employee_titles } from "../collections/employee-titles";
 import { titles } from "../collections/titles";
 
 export function useEmployeeTitles(employee_id: string) {
-    const collection = employee_titles(employee_id);
     const employee_titles_by_employee_id = useLiveQuery(
         (q) =>
-            q.from({ employee_title: collection }).innerJoin(
+            q.from({ employee_title: employee_titles(employee_id) }).innerJoin(
                 { title: titles },
                 ({ employee_title, title }) =>
                     eq(employee_title.title_id, title.id),
@@ -22,6 +21,7 @@ export function useEmployeeTitles(employee_id: string) {
         [employee_id],
     );
 
-    const { data, isLoading, isError } = employee_titles_by_employee_id;
-    return { data, isLoading, isError };
+    const { data, collection, isLoading, isError } =
+        employee_titles_by_employee_id;
+    return { data, collection, isLoading, isError };
 }

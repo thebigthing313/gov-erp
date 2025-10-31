@@ -30,6 +30,6 @@ export function useHolidayDates(year: number) {
         [year],
     );
 
-    const { data, isLoading, isError } = holidays_by_year;
-    return { data, isLoading, isError };
+    const { data, collection, isLoading, isError } = holidays_by_year;
+    return { data, collection, isLoading, isError };
 }
