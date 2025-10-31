@@ -8,7 +8,7 @@ import {
     ZodPayPeriodsUpdateToDbType,
 } from "../schemas/pay_periods";
 
-export const PayPeriods = createSupabaseCollection<
+export const pay_periods = createSupabaseCollection<
     ZodPayPeriodsRowType,
     ZodPayPeriodsInsertToDbType,
     ZodPayPeriodsUpdateToDbType
