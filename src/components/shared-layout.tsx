@@ -19,11 +19,9 @@ import { signOut } from '@/lib/auth'
 import { useEmployee } from '@/db/hooks/use-employee'
 import { useEmployeeTitles } from '@/db/hooks/use-employee-titles'
 
-interface SharedLayoutProps {
-  children?: React.ReactNode
-}
-
-export function SharedLayout({ children }: SharedLayoutProps) {
+export function SharedLayout({
+  children,
+}: React.ComponentPropsWithRef<typeof SidebarInset>) {
   return (
     <SidebarProvider className="max-h-svh">
       <SidebarInset className="h-screen">{children}</SidebarInset>
@@ -31,18 +29,10 @@ export function SharedLayout({ children }: SharedLayoutProps) {
   )
 }
 
-interface SharedLayoutHeaderProps
-  extends React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLDivElement>,
-    HTMLDivElement
-  > {
-  children?: React.ReactNode
-}
-
 export function SharedLayoutHeader({
   children,
   ...props
-}: SharedLayoutHeaderProps) {
+}: React.ComponentPropsWithRef<'div'>) {
   return (
     <>
       <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-100 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -60,21 +50,9 @@ export function SharedLayoutHeader({
   )
 }
 
-interface SharedLayoutInsetProps {
-  children?: React.ReactNode
-}
-export function SharedLayoutInset({ children }: SharedLayoutInsetProps) {
-  return (
-    <SidebarInset className="flex flex-col h-full w-full">
-      {children}
-    </SidebarInset>
-  )
-}
-
-interface SharedLayoutOutletProps {
-  children?: React.ReactNode
-}
-export function SharedLayoutOutlet({ children }: SharedLayoutOutletProps) {
+export function SharedLayoutOutlet({
+  children,
+}: React.ComponentPropsWithRef<'div'>) {
   return <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
 }
 
@@ -87,6 +65,7 @@ export function SharedLayoutSidebar({
   employee_id,
   children,
 }: SharedLayoutSidebarProps) {
+  const navigate = useNavigate()
   const {
     data: employee,
     isLoading: isLoadingEmployee,
@@ -103,7 +82,6 @@ export function SharedLayoutSidebar({
 
   const currentTitle = employee_titles[0]
 
-  const navigate = useNavigate()
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
