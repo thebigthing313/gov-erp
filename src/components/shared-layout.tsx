@@ -87,11 +87,21 @@ export function SharedLayoutSidebar({
   employee_id,
   children,
 }: SharedLayoutSidebarProps) {
-  const { employee_by_id } = useEmployee(employee_id)
-  const { query: titlesQuery } = useEmployeeTitles(employee_id)
+  const {
+    data: employee,
+    isLoading: isLoadingEmployee,
+    isError: isErrorEmployee,
+  } = useEmployee(employee_id)
+  const {
+    data: employee_titles,
+    isLoading: isLoadingEmployeeTitles,
+    isError: isErrorEmployeeTitles,
+  } = useEmployeeTitles(employee_id)
+  if (isLoadingEmployee || isLoadingEmployeeTitles) return <div>Loading...</div>
+  if (isErrorEmployee || isErrorEmployeeTitles || !employee || !employee_titles)
+    return <div>Error loading employee data.</div>
 
-  const employee = employee_by_id.data[0]
-  const currentTitle = titlesQuery.data[0]
+  const currentTitle = employee_titles[0]
 
   const navigate = useNavigate()
   return (
@@ -114,7 +124,7 @@ export function SharedLayoutSidebar({
               <div className="grid gap-0">
                 <span className="truncate font-medium">{`${employee.first_name} ${employee.last_name}`}</span>
                 <span className="text-muted-foreground">
-                  {currentTitle.titles.title_name}
+                  {currentTitle.title.title_name}
                 </span>
               </div>
             </SidebarMenuButton>
