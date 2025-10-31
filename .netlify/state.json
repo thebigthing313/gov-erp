@@ -1,0 +1,20 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "New Brunswick",
+			"country": {
+				"code": "US",
+				"name": "United States"
+			},
+			"subdivision": {
+				"code": "NJ",
+				"name": "New Jersey"
+			},
+			"timezone": "America/New_York",
+			"latitude": 40.488,
+			"longitude": -74.4544,
+			"postalCode": "08901"
+		},
+		"timestamp": 1761916482600
+	}
+}

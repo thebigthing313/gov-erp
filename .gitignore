@@ -8,7 +8,6 @@ count.txt
 .nitro
 .tanstack
 
-# Local Netlify folder
-.netlify
+supabase/seeds
 
 supabase/seeds
