@@ -12,11 +12,17 @@ import { useHolidayDates } from '@/db/hooks/use-holiday-dates'
 
 import { createFileRoute } from '@tanstack/react-router'
 import { Plus, PrinterIcon, WandSparkles } from 'lucide-react'
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import {
+  Dispatch,
+  lazy,
+  SetStateAction,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { forwardRef } from 'react'
-import { WizardDialog } from './-components/wizard-dialog'
 import { formatDate } from '@/lib/date-fns'
-import { AddNewHolidayForm } from './-components/new-holiday-form'
 import { PrintLayout } from '@/components/layout/print/print-layout'
 import { useReactToPrint } from 'react-to-print'
 import {
@@ -36,6 +42,8 @@ export const Route = createFileRoute('/timesheets/holidays')({
 })
 
 function RouteComponent() {
+  const LazyWizardDialog = lazy(() => import('./-components/wizard-dialog'))
+  const LazyAddForm = lazy(() => import('./-components/new-holiday-form'))
   const contentRef = useRef<HTMLDivElement>(null)
   const reactToPrintFn = useReactToPrint({ contentRef })
   const [isWizardOpen, setIsWizardOpen] = useState(false)
@@ -44,14 +52,6 @@ function RouteComponent() {
   const [isDeleteApproved, setIsDeleteApproved] = useState(false)
   const [holidayToDelete, setHolidayToDelete] = useState<string | null>(null)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
-  const {
-    data: holiday_dates_by_year,
-    isLoading,
-    isError,
-  } = useHolidayDates(currentYear)
-  if (isLoading) return <div>Loading...</div>
-  if (isError || !holiday_dates_by_year)
-    return <div>Error loading holidays.</div>
 
   // Effect to handle deletion after confirmation
   useEffect(() => {
@@ -61,6 +61,14 @@ function RouteComponent() {
       setIsDeleteApproved(false)
     }
   }, [isDeleteApproved, holidayToDelete])
+  const {
+    data: holiday_dates_by_year,
+    isLoading,
+    isError,
+  } = useHolidayDates(currentYear)
+  if (isLoading) return <div>Loading...</div>
+  if (isError || !holiday_dates_by_year)
+    return <div>Error loading holidays.</div>
 
   function handleDelete(holiday_id: string) {
     setHolidayToDelete(holiday_id)
@@ -103,49 +111,75 @@ function RouteComponent() {
           )
         })}
       </div>
-      <WizardDialog
-        year={currentYear}
-        open={isWizardOpen}
-        onOpenChange={setIsWizardOpen}
-      />
-      <AddNewHolidayForm
-        year={currentYear}
-        open={isFormOpen}
-        onOpenChange={setIsFormOpen}
-      />
+      {isWizardOpen && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <LazyWizardDialog
+            year={currentYear}
+            open={isWizardOpen}
+            onOpenChange={setIsWizardOpen}
+          />
+        </Suspense>
+      )}
+
+      {isFormOpen && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <LazyAddForm
+            year={currentYear}
+            open={isFormOpen}
+            onOpenChange={setIsFormOpen}
+          />
+        </Suspense>
+      )}
       <div className="hidden">
         <PrintableHolidaySchedule ref={contentRef} year={currentYear} />
       </div>
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove this holiday from the schedule?
-              This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>{' '}
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setHolidayToDelete(null)
-                setIsAlertOpen(false)
-              }}
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                setIsDeleteApproved(true)
-                setIsAlertOpen(false)
-              }}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmationDialog
+        open={isAlertOpen}
+        onOpenChange={setIsAlertOpen}
+        onDialogCancel={() => {
+          setHolidayToDelete(null)
+          setIsAlertOpen(false)
+        }}
+        onDialogDelete={() => {
+          setIsDeleteApproved(true)
+          setIsAlertOpen(false)
+        }}
+      />
     </div>
+  )
+}
+
+interface DeleteConfirmationDialogProps {
+  onDialogCancel: () => void
+  onDialogDelete: () => void
+}
+
+function DeleteConfirmationDialog({
+  onDialogCancel,
+  onDialogDelete,
+  ...props
+}: DeleteConfirmationDialogProps &
+  React.ComponentPropsWithoutRef<typeof AlertDialog>) {
+  return (
+    <AlertDialog {...props}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to remove this holiday from the schedule? This
+            cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>{' '}
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => onDialogCancel()}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={() => onDialogDelete()}>
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 
