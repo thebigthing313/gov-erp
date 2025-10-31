@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { YearSelector } from '@/components/year-selector'
-import { useHolidays } from '@/db/hooks/use-holidays'
+import { useHolidayDates } from '@/db/hooks/use-holiday-dates'
 
 import { createFileRoute } from '@tanstack/react-router'
 import { Plus, PrinterIcon, WandSparkles } from 'lucide-react'
@@ -48,7 +48,7 @@ function RouteComponent() {
     data: holiday_dates_by_year,
     isLoading,
     isError,
-  } = useHolidays(currentYear)
+  } = useHolidayDates(currentYear)
   if (isLoading) return <div>Loading...</div>
   if (isError || !holiday_dates_by_year)
     return <div>Error loading holidays.</div>
@@ -212,7 +212,7 @@ const PrintableHolidaySchedule = forwardRef<HTMLDivElement, { year: number }>(
       data: holiday_dates_by_year,
       isLoading,
       isError,
-    } = useHolidays(year)
+    } = useHolidayDates(year)
     if (isLoading) return <div>Loading...</div>
     if (isError || !holiday_dates_by_year)
       return <div>Error loading holidays.</div>
