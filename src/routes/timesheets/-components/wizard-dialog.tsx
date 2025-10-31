@@ -8,11 +8,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useHolidays } from '@/db/hooks/use-holidays'
+import { useHolidayDates } from '@/db/hooks/use-holiday-dates'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { formatDate } from '@/lib/date-fns'
 import { getHolidayDate } from '../-lib/holiday-wizard'
-import { useEffect, useMemo, useState } from 'react'
+import { useHolidays } from '@/db/hooks/use-holidays'
+import { useLiveQuery } from '@tanstack/react-db'
+import { eq, isUndefined } from '@tanstack/react-db'
+import { holiday_dates } from '@/db/collections/holiday-dates'
+import { useMemo, useState } from 'react'
 
 interface WizardDialogProps {
   year: number
@@ -20,28 +24,65 @@ interface WizardDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function WizardDialog({ year, open, onOpenChange }: WizardDialogProps) {
+export default function WizardDialog({
+  year,
+  open,
+  onOpenChange,
+}: WizardDialogProps) {
   const isMobile = useIsMobile()
-  const { missingHolidaysByYear, holiday_dates } = useHolidays(year)
+  const {
+    collection: active_holidays_collection,
+    isLoading: isLoadingHolidays,
+    isError: isErrorHolidays,
+  } = useHolidays()
+  const {
+    collection: holiday_dates_by_year_collection,
+    isLoading: isLoadingHolidayDates,
+    isError: isErrorHolidayDates,
+  } = useHolidayDates(year)
+  if (isLoadingHolidays || isLoadingHolidayDates) {
+    return <div>Loading...</div>
+  }
+  if (isErrorHolidays || isErrorHolidayDates) {
+    return <div>Error loading data.</div>
+  }
 
-  // Safely handle loading state with memoization
-  const missingHolidayCalculatedDates = useMemo(
-    () =>
-      missingHolidaysByYear.data?.map((holiday) => ({
-        ...holiday,
-        holiday_date: getHolidayDate(year, holiday.id),
-      })) || [],
-    [missingHolidaysByYear.data, year],
+  const missing_holidays = useLiveQuery(
+    (q) =>
+      q
+        .from({ holiday: active_holidays_collection })
+        .leftJoin(
+          { holiday_date: holiday_dates_by_year_collection },
+          ({ holiday, holiday_date }) =>
+            eq(holiday.id, holiday_date.holiday_id),
+        )
+        .where(({ holiday_date }) => isUndefined(holiday_date))
+        .fn.select((row) => ({
+          id: row.holiday.id,
+          name: row.holiday.name,
+          calculated_holiday_date: getHolidayDate(year, row.holiday.id),
+        })),
+    [year],
   )
 
-  const [holidaysToAdd, setHolidaysToAdd] = useState(
-    missingHolidayCalculatedDates,
-  )
+  const filtered_missing_holidays: Array<{
+    id: string
+    name: string
+    holiday_date: Date
+  }> = useMemo(() => {
+    if (!missing_holidays.data) return []
+    return missing_holidays.data
+      .filter((holiday) => holiday.calculated_holiday_date !== null)
+      .map((holiday) => ({
+        id: holiday.id,
+        name: holiday.name,
+        holiday_date: holiday.calculated_holiday_date!, // Safe after null filter
+      }))
+  }, [missing_holidays.data])
 
-  // Update state when data loads
-  useEffect(() => {
-    setHolidaysToAdd(missingHolidayCalculatedDates)
-  }, [missingHolidayCalculatedDates])
+  const [holidaysToAdd, setHolidaysToAdd] = useState<
+    Array<{ id: string; name: string; holiday_date: Date }>
+  >(filtered_missing_holidays)
 
   function removeFromList(holidayId: string) {
     setHolidaysToAdd((prev) =>
@@ -50,15 +91,13 @@ export function WizardDialog({ year, open, onOpenChange }: WizardDialogProps) {
   }
 
   function insertHolidays() {
-    const batchInsert = holidaysToAdd.map((holiday) => {
-      return {
-        id: crypto.randomUUID().toString(),
-        holiday_id: holiday.id,
-        holiday_date: holiday.holiday_date,
-      }
-    })
+    const batchInsert = holidaysToAdd.map((holiday) => ({
+      id: crypto.randomUUID().toString(),
+      holiday_id: holiday.id,
+      holiday_date: holiday.holiday_date,
+    }))
 
-    holiday_dates.insert(batchInsert as any)
+    holiday_dates.insert(batchInsert)
   }
 
   return (
