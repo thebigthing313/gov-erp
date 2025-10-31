@@ -1,4 +1,3 @@
-import { parsePhoneNumberFromString } from "libphonenumber-js";
 import z from "zod";
 
 export const EmailSchema = z.email("Invalid email address");
@@ -27,23 +26,6 @@ export const PasswordSchema = z
 
 export const RedirectSchema = z.string();
 
-export const PhoneNumberSchema = z
-    .string()
-    .min(1, "Phone number is required")
-    .refine(
-        (raw) => {
-            if (!raw) return false;
-            const trimmed = raw.trim();
-
-            try {
-                const parsed = parsePhoneNumberFromString(trimmed);
-                return parsed ? parsed.isPossible() : false;
-            } catch {
-                return false;
-            }
-        },
-        { message: "Invalid phone number" },
-    )
-    .transform((v) => v.trim());
+export const PhoneNumberSchema = z.string().min(6);
 
 export const URLSchema = z.url();
