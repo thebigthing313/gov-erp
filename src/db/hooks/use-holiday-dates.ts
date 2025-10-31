@@ -3,8 +3,8 @@ import { holidays } from "../collections/holidays";
 import { holiday_dates } from "../collections/holiday-dates";
 
 export function useHolidayDates(year: number) {
-    const startOfYear = new Date(year, 0, 1);
-    const endOfYear = new Date(year, 11, 31);
+    const startOfYear = new Date(Date.UTC(year, 0, 1));
+    const endOfYear = new Date(Date.UTC(year, 11, 31));
 
     const holidays_by_year = useLiveQuery(
         (q) =>
