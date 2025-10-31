@@ -29,8 +29,9 @@ function RouteComponent() {
   const { company, auth } = Route.useRouteContext()
   if (!auth.employeeId) return null
 
-  const { employee_by_id } = useEmployee(auth.employeeId)
-  const employee = employee_by_id.data[0]
+  const { data: employee, isLoading, isError } = useEmployee(auth.employeeId)
+  if (isLoading) return <div>Loading...</div>
+  if (isError || !employee) return <div>Error loading employee data.</div>
 
   const navigate = useNavigate()
 
