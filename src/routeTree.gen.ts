@@ -23,6 +23,8 @@ import { Route as EmployeePortalChangelogRouteImport } from './routes/employee-p
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as TimesheetsPayPeriodsRouteRouteImport } from './routes/timesheets/pay-periods/route'
 import { Route as TimesheetsPayPeriodsIndexRouteImport } from './routes/timesheets/pay-periods/index'
+import { Route as TimesheetsPayPeriodsYearRouteImport } from './routes/timesheets/pay-periods/$year'
+import { Route as TimesheetsPayPeriodsYearPpRouteImport } from './routes/timesheets/pay-periods/$year.$pp'
 
 const TimesheetsRouteRoute = TimesheetsRouteRouteImport.update({
   id: '/timesheets',
@@ -94,6 +96,18 @@ const TimesheetsPayPeriodsIndexRoute =
     path: '/',
     getParentRoute: () => TimesheetsPayPeriodsRouteRoute,
   } as any)
+const TimesheetsPayPeriodsYearRoute =
+  TimesheetsPayPeriodsYearRouteImport.update({
+    id: '/$year',
+    path: '/$year',
+    getParentRoute: () => TimesheetsPayPeriodsRouteRoute,
+  } as any)
+const TimesheetsPayPeriodsYearPpRoute =
+  TimesheetsPayPeriodsYearPpRouteImport.update({
+    id: '/$pp',
+    path: '/$pp',
+    getParentRoute: () => TimesheetsPayPeriodsYearRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/employee-portal': typeof EmployeePortalRouteRouteWithChildren
@@ -107,7 +121,9 @@ export interface FileRoutesByFullPath {
   '/': typeof appIndexRoute
   '/employee-portal/': typeof EmployeePortalIndexRoute
   '/timesheets/': typeof TimesheetsIndexRoute
+  '/timesheets/pay-periods/$year': typeof TimesheetsPayPeriodsYearRouteWithChildren
   '/timesheets/pay-periods/': typeof TimesheetsPayPeriodsIndexRoute
+  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
@@ -118,7 +134,9 @@ export interface FileRoutesByTo {
   '/': typeof appIndexRoute
   '/employee-portal': typeof EmployeePortalIndexRoute
   '/timesheets': typeof TimesheetsIndexRoute
+  '/timesheets/pay-periods/$year': typeof TimesheetsPayPeriodsYearRouteWithChildren
   '/timesheets/pay-periods': typeof TimesheetsPayPeriodsIndexRoute
+  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -135,7 +153,9 @@ export interface FileRoutesById {
   '/(app)/': typeof appIndexRoute
   '/employee-portal/': typeof EmployeePortalIndexRoute
   '/timesheets/': typeof TimesheetsIndexRoute
+  '/timesheets/pay-periods/$year': typeof TimesheetsPayPeriodsYearRouteWithChildren
   '/timesheets/pay-periods/': typeof TimesheetsPayPeriodsIndexRoute
+  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,7 +171,9 @@ export interface FileRouteTypes {
     | '/'
     | '/employee-portal/'
     | '/timesheets/'
+    | '/timesheets/pay-periods/$year'
     | '/timesheets/pay-periods/'
+    | '/timesheets/pay-periods/$year/$pp'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -162,7 +184,9 @@ export interface FileRouteTypes {
     | '/'
     | '/employee-portal'
     | '/timesheets'
+    | '/timesheets/pay-periods/$year'
     | '/timesheets/pay-periods'
+    | '/timesheets/pay-periods/$year/$pp'
   id:
     | '__root__'
     | '/(app)'
@@ -178,7 +202,9 @@ export interface FileRouteTypes {
     | '/(app)/'
     | '/employee-portal/'
     | '/timesheets/'
+    | '/timesheets/pay-periods/$year'
     | '/timesheets/pay-periods/'
+    | '/timesheets/pay-periods/$year/$pp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -288,6 +314,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TimesheetsPayPeriodsIndexRouteImport
       parentRoute: typeof TimesheetsPayPeriodsRouteRoute
     }
+    '/timesheets/pay-periods/$year': {
+      id: '/timesheets/pay-periods/$year'
+      path: '/$year'
+      fullPath: '/timesheets/pay-periods/$year'
+      preLoaderRoute: typeof TimesheetsPayPeriodsYearRouteImport
+      parentRoute: typeof TimesheetsPayPeriodsRouteRoute
+    }
+    '/timesheets/pay-periods/$year/$pp': {
+      id: '/timesheets/pay-periods/$year/$pp'
+      path: '/$pp'
+      fullPath: '/timesheets/pay-periods/$year/$pp'
+      preLoaderRoute: typeof TimesheetsPayPeriodsYearPpRouteImport
+      parentRoute: typeof TimesheetsPayPeriodsYearRoute
+    }
   }
 }
 
@@ -330,12 +370,28 @@ const EmployeePortalRouteRouteChildren: EmployeePortalRouteRouteChildren = {
 const EmployeePortalRouteRouteWithChildren =
   EmployeePortalRouteRoute._addFileChildren(EmployeePortalRouteRouteChildren)
 
+interface TimesheetsPayPeriodsYearRouteChildren {
+  TimesheetsPayPeriodsYearPpRoute: typeof TimesheetsPayPeriodsYearPpRoute
+}
+
+const TimesheetsPayPeriodsYearRouteChildren: TimesheetsPayPeriodsYearRouteChildren =
+  {
+    TimesheetsPayPeriodsYearPpRoute: TimesheetsPayPeriodsYearPpRoute,
+  }
+
+const TimesheetsPayPeriodsYearRouteWithChildren =
+  TimesheetsPayPeriodsYearRoute._addFileChildren(
+    TimesheetsPayPeriodsYearRouteChildren,
+  )
+
 interface TimesheetsPayPeriodsRouteRouteChildren {
+  TimesheetsPayPeriodsYearRoute: typeof TimesheetsPayPeriodsYearRouteWithChildren
   TimesheetsPayPeriodsIndexRoute: typeof TimesheetsPayPeriodsIndexRoute
 }
 
 const TimesheetsPayPeriodsRouteRouteChildren: TimesheetsPayPeriodsRouteRouteChildren =
   {
+    TimesheetsPayPeriodsYearRoute: TimesheetsPayPeriodsYearRouteWithChildren,
     TimesheetsPayPeriodsIndexRoute: TimesheetsPayPeriodsIndexRoute,
   }
 
