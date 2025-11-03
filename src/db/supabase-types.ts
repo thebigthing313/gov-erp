@@ -478,7 +478,6 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          holiday_date_id: string | null
           id: string
           modified_at: string
           modified_by: string | null
@@ -489,7 +488,6 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          holiday_date_id?: string | null
           id?: string
           modified_at?: string
           modified_by?: string | null
@@ -500,7 +498,6 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          holiday_date_id?: string | null
           id?: string
           modified_at?: string
           modified_by?: string | null
@@ -509,13 +506,6 @@ export type Database = {
           timesheet_date?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "timesheets_holiday_date_id_fkey"
-            columns: ["holiday_date_id"]
-            isOneToOne: false
-            referencedRelation: "holiday_dates"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "timesheets_pay_period_id_fkey"
             columns: ["pay_period_id"]
