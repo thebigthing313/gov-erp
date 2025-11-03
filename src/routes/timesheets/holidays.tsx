@@ -39,6 +39,9 @@ import { holiday_dates } from '@/db/collections/holiday-dates'
 
 export const Route = createFileRoute('/timesheets/holidays')({
   component: RouteComponent,
+  loader: () => {
+    return { crumb: 'Holidays' }
+  },
 })
 
 function RouteComponent() {
