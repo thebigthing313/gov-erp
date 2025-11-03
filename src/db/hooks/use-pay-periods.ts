@@ -13,7 +13,7 @@ export function usePayPeriods(year: number) {
         [year],
     );
 
-    const { data, isLoading, isError } = pay_periods_by_year;
+    const { data, collection, isLoading, isError } = pay_periods_by_year;
 
-    return { data, isLoading, isError };
+    return { data, collection, isLoading, isError };
 }
