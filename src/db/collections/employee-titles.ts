@@ -35,9 +35,6 @@ const employeeTitlesCollectionFactory =
             employee_id,
         ) => {
             // This query fetches data filtered by the provided employee_id
-            console.log(
-                `Fetching employee_titles for employee_id: ${employee_id}`,
-            );
             const { data, error } = await supabase
                 .from(table)
                 .select("*")
