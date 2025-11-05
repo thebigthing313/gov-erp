@@ -1,35 +1,29 @@
+import { RenderTable } from '@/components/render-table'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Spinner } from '@/components/ui/spinner'
 import { usePayrollYears } from '@/db/hooks/use-payroll-years'
 import { formatDate } from '@/lib/date-fns'
-import { cn } from '@/lib/utils'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-  ChevronsUpDown,
-  BookOpen,
-} from 'lucide-react'
-import { useState } from 'react'
+import { BookOpen } from 'lucide-react'
+import { Suspense, useState } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 
 export const Route = createFileRoute('/timesheets/pay-periods/')({
-  component: RouteComponent,
+  component: () => (
+    <ErrorBoundary fallback={<div>Error loading route.</div>}>
+      <Suspense fallback={<Spinner />}>
+        <RouteComponent />
+      </Suspense>
+    </ErrorBoundary>
+  ),
 })
 
 type PayrollYear = {
@@ -59,24 +53,26 @@ const columns = [
     header: () => <Label className="text-center">Timesheets</Label>,
     columns: [
       columnHelper.accessor('start_date', {
+        header: () => <Label className="text-center">Start Date</Label>,
         cell: (info) =>
           formatDate(info.getValue(), {
+            weekday: 'long',
             month: 'numeric',
             day: 'numeric',
             year: 'numeric',
           }),
-        header: () => <Label>Start Date</Label>,
-        sortingFn: 'datetime',
+        enableSorting: false,
       }),
       columnHelper.accessor('end_date', {
         cell: (info) =>
           formatDate(info.getValue(), {
+            weekday: 'long',
             month: 'numeric',
             day: 'numeric',
             year: 'numeric',
           }),
         header: () => <Label>End Date</Label>,
-        sortingFn: 'datetime',
+        enableSorting: false,
       }),
     ],
   }),
@@ -87,22 +83,24 @@ const columns = [
       columnHelper.accessor('first_pay_date', {
         cell: (info) =>
           formatDate(info.getValue(), {
+            weekday: 'long',
             month: 'numeric',
             day: 'numeric',
             year: 'numeric',
           }),
         header: () => <Label>First Pay Date</Label>,
-        sortingFn: 'datetime',
+        enableSorting: false,
       }),
       columnHelper.accessor('last_pay_date', {
         cell: (info) =>
           formatDate(info.getValue(), {
+            weekday: 'long',
             month: 'numeric',
             day: 'numeric',
             year: 'numeric',
           }),
         header: () => <Label>Last Pay Date</Label>,
-        sortingFn: 'datetime',
+        enableSorting: false,
       }),
     ],
   }),
@@ -124,12 +122,12 @@ const columns = [
 ]
 
 function RouteComponent() {
-  const { data: payroll_years, isLoading, isError } = usePayrollYears()
+  const { data: payroll_years } = usePayrollYears()
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'year', desc: true },
   ])
 
-  const table = useReactTable({
+  const payrollTable = useReactTable({
     columns,
     data: payroll_years,
     getCoreRowModel: getCoreRowModel(),
@@ -137,75 +135,6 @@ function RouteComponent() {
     onSortingChange: setSorting,
     state: { sorting },
   })
-  if (isLoading) {
-    return <div>Loading payroll years...</div>
-  }
-  if (isError) {
-    return <div>Error loading payroll years.</div>
-  }
 
-  return (
-    <div className="w-full border rounded-md">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={cn(
-                          'w-full flex gap-2',
-                          header.column.getCanSort()
-                            ? 'cursor-pointer select-none'
-                            : '',
-                        )}
-                        onClick={header.column.getToggleSortingHandler()}
-                        title={
-                          header.column.getCanSort()
-                            ? header.column.getNextSortingOrder() === 'asc'
-                              ? 'Sort ascending'
-                              : header.column.getNextSortingOrder() === 'desc'
-                                ? 'Sort descending'
-                                : 'Clear sort'
-                            : undefined
-                        }
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {header.column.getCanSort() &&
-                          (header.column.getIsSorted() === 'asc' ? (
-                            <ChevronUpIcon className="ml-2 h-4 w-4" />
-                          ) : header.column.getIsSorted() === 'desc' ? (
-                            <ChevronDownIcon className="ml-2 h-4 w-4" />
-                          ) : (
-                            <ChevronsUpDown className="ml-2 h-4 w-4" />
-                          ))}
-                      </div>
-                    )}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => {
-                return (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  )
+  return RenderTable<PayrollYear>(payrollTable)
 }
