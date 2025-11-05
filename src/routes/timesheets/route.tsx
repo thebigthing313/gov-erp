@@ -3,12 +3,12 @@ import {
   SharedLayoutOutlet,
   SharedLayoutSidebar,
 } from '@/components/shared-layout'
-import { Typography } from '@/components/typography'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Auth, getAuth, hasPermission, isAuthenticated } from '@/lib/auth'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { TimesheetsSidebarContent } from './-components/sidebar-contents'
 import { Spinner } from '@/components/ui/spinner'
+import { SharedBreadcrumb } from '@/components/shared-breadcrumb'
 
 export const Route = createFileRoute('/timesheets')({
   beforeLoad: async () => {
@@ -28,6 +28,9 @@ export const Route = createFileRoute('/timesheets')({
   },
   pendingComponent: () => <Spinner />,
   component: RouteComponent,
+  loader: () => {
+    return { crumb: 'Timesheet Program' }
+  },
 })
 
 function RouteComponent() {
@@ -39,7 +42,7 @@ function RouteComponent() {
       </SharedLayoutSidebar>
       <SidebarInset>
         <SharedLayoutHeader>
-          <Typography tag="h4">Timesheet Program</Typography>
+          <SharedBreadcrumb />
         </SharedLayoutHeader>
         <SharedLayoutOutlet>
           <Outlet />
