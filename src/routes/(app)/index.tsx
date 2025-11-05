@@ -27,12 +27,7 @@ export const Route = createFileRoute('/(app)/')({
 
 function RouteComponent() {
   const { company, auth } = Route.useRouteContext()
-  if (!auth.employeeId) return null
-
-  const { data: employee, isLoading, isError } = useEmployee(auth.employeeId)
-  if (isLoading) return <div>Loading...</div>
-  if (isError || !employee) return <div>Error loading employee data.</div>
-
+  const employee = useEmployee(auth.employeeId)
   const navigate = useNavigate()
 
   const parsedPhone = parsePhoneNumberWithError(company.phone, {
