@@ -11,7 +11,8 @@ export const Route = createFileRoute('/timesheets/pay-periods')({
 function RouteComponent() {
   return (
     <div className="flex flex-col gap-2">
-      <GoToCurrentButtons />
+      {/* <GoToCurrentButtons /> */}
+
       <Outlet />
     </div>
   )

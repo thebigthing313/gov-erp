@@ -110,7 +110,8 @@ const columns = [
     cell: (props) => (
       <Button type="button" variant="ghost" size="icon" asChild>
         <Link
-          to="/timesheets/pay-periods/$year"
+          to="./$year"
+          from="/timesheets/pay-periods/"
           params={{ year: props.row.original.year }}
         >
           <BookOpen />
