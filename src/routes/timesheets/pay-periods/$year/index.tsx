@@ -1,5 +1,5 @@
 import { usePayPeriods } from '@/db/hooks/use-pay-periods'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import z from 'zod'
 import {
   createColumnHelper,
@@ -15,6 +15,8 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Spinner } from '@/components/ui/spinner'
 import { useLiveSuspenseQuery } from '@tanstack/react-db'
 import { RenderTable } from '@/components/render-table'
+import { Button } from '@/components/ui/button'
+import { BookOpen } from 'lucide-react'
 
 const RouteParam = z.object({
   year: z.coerce.number(),
@@ -30,9 +32,6 @@ export const Route = createFileRoute('/timesheets/pay-periods/$year/')({
   ),
   params: {
     parse: (raw) => RouteParam.parse(raw),
-  },
-  loader: ({ params }) => {
-    return { crumb: `${params.year}` }
   },
 })
 
@@ -86,8 +85,18 @@ const columns = [
   }),
   columnHelper.display({
     id: 'actions',
-    cell: () => <div>actions</div>,
-    header: () => <Label>Actions</Label>,
+    cell: (props) => (
+      <Button type="button" variant="ghost" size="icon" asChild>
+        <Link
+          to="./$pp"
+          from="/timesheets/pay-periods/$year/"
+          params={{ pp: props.row.original.pp_number }}
+        >
+          <BookOpen />
+        </Link>
+      </Button>
+    ),
+    header: () => <Label>Open</Label>,
   }),
 ]
 
@@ -95,15 +104,17 @@ function RouteComponent() {
   const { year } = Route.useParams()
   const { collection } = usePayPeriods(year)
 
-  const { data: pay_periods_by_year } = useLiveSuspenseQuery((q) =>
-    q.from({ pay_period: collection }).select(({ pay_period }) => {
-      return {
-        pp_number: pay_period.pay_period_number,
-        start_date: pay_period.begin_date,
-        end_date: pay_period.end_date,
-        pay_date: pay_period.pay_date,
-      }
-    }),
+  const { data: pay_periods_by_year } = useLiveSuspenseQuery(
+    (q) =>
+      q.from({ pay_period: collection }).select(({ pay_period }) => {
+        return {
+          pp_number: pay_period.pay_period_number,
+          start_date: pay_period.begin_date,
+          end_date: pay_period.end_date,
+          pay_date: pay_period.pay_date,
+        }
+      }),
+    [year],
   )
 
   const [sorting, setSorting] = useState<SortingState>([
