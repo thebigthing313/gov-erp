@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/tooltip'
 import { YearSelector } from '@/components/year-selector'
 import { useHolidayDates } from '@/db/hooks/use-holiday-dates'
-
+import { ErrorBoundary } from 'react-error-boundary'
 import { createFileRoute } from '@tanstack/react-router'
 import { Plus, PrinterIcon, WandSparkles } from 'lucide-react'
 import {
@@ -38,7 +38,13 @@ import {
 import { holiday_dates } from '@/db/collections/holiday-dates'
 
 export const Route = createFileRoute('/timesheets/holidays')({
-  component: RouteComponent,
+  component: () => (
+    <ErrorBoundary fallback={<div>Error loading holidays.</div>}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <RouteComponent />
+      </Suspense>
+    </ErrorBoundary>
+  ),
   loader: () => {
     return { crumb: 'Holidays' }
   },
@@ -64,14 +70,7 @@ function RouteComponent() {
       setIsDeleteApproved(false)
     }
   }, [isDeleteApproved, holidayToDelete])
-  const {
-    data: holiday_dates_by_year,
-    isLoading,
-    isError,
-  } = useHolidayDates(currentYear)
-  if (isLoading) return <div>Loading...</div>
-  if (isError || !holiday_dates_by_year)
-    return <div>Error loading holidays.</div>
+  const { data: holiday_dates_by_year } = useHolidayDates(currentYear)
 
   function handleDelete(holiday_id: string) {
     setHolidayToDelete(holiday_id)
@@ -93,6 +92,7 @@ function RouteComponent() {
           <PrintButton onClick={reactToPrintFn} />
         </ButtonGroup>
       </nav>
+
       <div className="flex flex-row flex-wrap gap-0">
         {holiday_dates_by_year.map((holiday_date, index) => {
           const formattedDate = formatDate(holiday_date.holiday_date, {
@@ -115,23 +115,19 @@ function RouteComponent() {
         })}
       </div>
       {isWizardOpen && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <LazyWizardDialog
-            year={currentYear}
-            open={isWizardOpen}
-            onOpenChange={setIsWizardOpen}
-          />
-        </Suspense>
+        <LazyWizardDialog
+          year={currentYear}
+          open={isWizardOpen}
+          onOpenChange={setIsWizardOpen}
+        />
       )}
 
       {isFormOpen && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <LazyAddForm
-            year={currentYear}
-            open={isFormOpen}
-            onOpenChange={setIsFormOpen}
-          />
-        </Suspense>
+        <LazyAddForm
+          year={currentYear}
+          open={isFormOpen}
+          onOpenChange={setIsFormOpen}
+        />
       )}
       <div className="hidden">
         <PrintableHolidaySchedule ref={contentRef} year={currentYear} />
@@ -245,14 +241,7 @@ function PrintButton({ onClick }: { onClick: () => void }) {
 
 const PrintableHolidaySchedule = forwardRef<HTMLDivElement, { year: number }>(
   ({ year }, ref) => {
-    const {
-      data: holiday_dates_by_year,
-      isLoading,
-      isError,
-    } = useHolidayDates(year)
-    if (isLoading) return <div>Loading...</div>
-    if (isError || !holiday_dates_by_year)
-      return <div>Error loading holidays.</div>
+    const { data: holiday_dates_by_year } = useHolidayDates(year)
 
     return (
       <PrintLayout ref={ref}>
