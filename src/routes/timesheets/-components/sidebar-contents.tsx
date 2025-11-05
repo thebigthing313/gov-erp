@@ -20,14 +20,14 @@ const sidebarItems: Array<SidebarItem> = [
     linkProps: { to: '/timesheets' },
   },
   {
-    icon: <TreePalm />,
-    label: 'Holidays',
-    linkProps: { to: '/timesheets/holidays' },
-  },
-  {
     icon: <CalendarDays />,
     label: 'Pay Periods',
     linkProps: { to: '/timesheets/pay-periods' },
+  },
+  {
+    icon: <TreePalm />,
+    label: 'Holidays',
+    linkProps: { to: '/timesheets/holidays' },
   },
 ]
 export function TimesheetsSidebarContent() {
