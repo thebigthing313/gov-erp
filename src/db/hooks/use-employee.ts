@@ -1,8 +1,8 @@
-import { eq, useLiveQuery } from "@tanstack/react-db";
+import { eq, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { employees } from "../collections/employees";
 
 export function useEmployee(employee_id: string) {
-    const employee_by_id = useLiveQuery(
+    const query = useLiveSuspenseQuery(
         (q) =>
             q.from({ employee: employees }).where(({ employee }) =>
                 eq(employee.id, employee_id)
@@ -10,6 +10,9 @@ export function useEmployee(employee_id: string) {
         [employee_id],
     );
 
-    const { data, collection, isLoading, isError } = employee_by_id;
-    return { data, collection, isLoading, isError };
+    if (!query.data) {
+        throw new Error(`Employee with id ${employee_id} not found`);
+    }
+
+    return query.data;
 }

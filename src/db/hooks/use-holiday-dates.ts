@@ -1,4 +1,4 @@
-import { and, eq, gte, lte, useLiveQuery } from "@tanstack/react-db";
+import { and, eq, gte, lte, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { holidays } from "../collections/holidays";
 import { holiday_dates } from "../collections/holiday-dates";
 
@@ -6,7 +6,7 @@ export function useHolidayDates(year: number) {
     const startOfYear = new Date(Date.UTC(year, 0, 1));
     const endOfYear = new Date(Date.UTC(year, 11, 31));
 
-    const holidays_by_year = useLiveQuery(
+    return useLiveSuspenseQuery(
         (q) =>
             q.from({ holiday_date: holiday_dates })
                 .innerJoin(
@@ -29,7 +29,4 @@ export function useHolidayDates(year: number) {
                 }),
         [year],
     );
-
-    const { data, collection, isLoading, isError } = holidays_by_year;
-    return { data, collection, isLoading, isError };
 }

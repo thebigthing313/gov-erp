@@ -1,9 +1,9 @@
-import { eq, useLiveQuery } from "@tanstack/react-db";
+import { eq, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { timesheets } from "../collections/timesheets";
 import { pay_periods } from "../collections/pay-periods";
 
 export function useTimesheets(year: number) {
-    const query = useLiveQuery(
+    return useLiveSuspenseQuery(
         (q) =>
             q.from({ timesheet: timesheets(year) }).innerJoin({
                 pay_period: pay_periods,
@@ -22,7 +22,4 @@ export function useTimesheets(year: number) {
                 }),
         [year],
     );
-
-    const { data, collection, isLoading, isError } = query;
-    return { data, collection, isLoading, isError };
 }

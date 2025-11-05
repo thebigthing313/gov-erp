@@ -1,4 +1,4 @@
-import { and, eq, gte, lte, useLiveQuery } from "@tanstack/react-db";
+import { and, eq, gte, lte, useLiveSuspenseQuery } from "@tanstack/react-db";
 import { usePayPeriods } from "./use-pay-periods";
 import { useTimesheets } from "./use-timesheets";
 
@@ -14,7 +14,7 @@ export function useCurrentTimesheetInfo() {
     const { collection: timesheets_by_year } = useTimesheets(year);
     const { collection: pay_periods_by_year } = usePayPeriods(year);
 
-    const { data: current_timesheet } = useLiveQuery(
+    const { data: current_timesheet } = useLiveSuspenseQuery(
         (q) =>
             q.from({ timesheet: timesheets_by_year }).where(({ timesheet }) =>
                 eq(timesheet.timesheet_date, todayMidnightUTC)
@@ -26,7 +26,7 @@ export function useCurrentTimesheetInfo() {
         [timesheets_by_year],
     );
 
-    const { data: current_pay_period } = useLiveQuery(
+    const { data: current_pay_period } = useLiveSuspenseQuery(
         (q) =>
             q.from({ pay_periods: pay_periods_by_year }).where((
                 { pay_periods },
