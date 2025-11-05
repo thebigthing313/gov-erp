@@ -25,8 +25,9 @@ import { Route as TimesheetsPayPeriodsRouteRouteImport } from './routes/timeshee
 import { Route as TimesheetsPayPeriodsIndexRouteImport } from './routes/timesheets/pay-periods/index'
 import { Route as TimesheetsPayPeriodsYearRouteRouteImport } from './routes/timesheets/pay-periods/$year/route'
 import { Route as TimesheetsPayPeriodsYearIndexRouteImport } from './routes/timesheets/pay-periods/$year/index'
-import { Route as TimesheetsPayPeriodsYearPpRouteImport } from './routes/timesheets/pay-periods/$year/$pp'
-import { Route as TimesheetsPayPeriodsYearPpDateRouteImport } from './routes/timesheets/pay-periods/$year.$pp.$date'
+import { Route as TimesheetsPayPeriodsYearPpRouteRouteImport } from './routes/timesheets/pay-periods/$year/$pp/route'
+import { Route as TimesheetsPayPeriodsYearPpIndexRouteImport } from './routes/timesheets/pay-periods/$year/$pp/index'
+import { Route as TimesheetsPayPeriodsYearPpDateRouteImport } from './routes/timesheets/pay-periods/$year/$pp/$date'
 
 const TimesheetsRouteRoute = TimesheetsRouteRouteImport.update({
   id: '/timesheets',
@@ -110,17 +111,23 @@ const TimesheetsPayPeriodsYearIndexRoute =
     path: '/',
     getParentRoute: () => TimesheetsPayPeriodsYearRouteRoute,
   } as any)
-const TimesheetsPayPeriodsYearPpRoute =
-  TimesheetsPayPeriodsYearPpRouteImport.update({
+const TimesheetsPayPeriodsYearPpRouteRoute =
+  TimesheetsPayPeriodsYearPpRouteRouteImport.update({
     id: '/$pp',
     path: '/$pp',
     getParentRoute: () => TimesheetsPayPeriodsYearRouteRoute,
+  } as any)
+const TimesheetsPayPeriodsYearPpIndexRoute =
+  TimesheetsPayPeriodsYearPpIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => TimesheetsPayPeriodsYearPpRouteRoute,
   } as any)
 const TimesheetsPayPeriodsYearPpDateRoute =
   TimesheetsPayPeriodsYearPpDateRouteImport.update({
     id: '/$date',
     path: '/$date',
-    getParentRoute: () => TimesheetsPayPeriodsYearPpRoute,
+    getParentRoute: () => TimesheetsPayPeriodsYearPpRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -137,9 +144,10 @@ export interface FileRoutesByFullPath {
   '/timesheets/': typeof TimesheetsIndexRoute
   '/timesheets/pay-periods/$year': typeof TimesheetsPayPeriodsYearRouteRouteWithChildren
   '/timesheets/pay-periods/': typeof TimesheetsPayPeriodsIndexRoute
-  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpRouteWithChildren
+  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpRouteRouteWithChildren
   '/timesheets/pay-periods/$year/': typeof TimesheetsPayPeriodsYearIndexRoute
   '/timesheets/pay-periods/$year/$pp/$date': typeof TimesheetsPayPeriodsYearPpDateRoute
+  '/timesheets/pay-periods/$year/$pp/': typeof TimesheetsPayPeriodsYearPpIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
@@ -151,9 +159,9 @@ export interface FileRoutesByTo {
   '/employee-portal': typeof EmployeePortalIndexRoute
   '/timesheets': typeof TimesheetsIndexRoute
   '/timesheets/pay-periods': typeof TimesheetsPayPeriodsIndexRoute
-  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpRouteWithChildren
   '/timesheets/pay-periods/$year': typeof TimesheetsPayPeriodsYearIndexRoute
   '/timesheets/pay-periods/$year/$pp/$date': typeof TimesheetsPayPeriodsYearPpDateRoute
+  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -172,9 +180,10 @@ export interface FileRoutesById {
   '/timesheets/': typeof TimesheetsIndexRoute
   '/timesheets/pay-periods/$year': typeof TimesheetsPayPeriodsYearRouteRouteWithChildren
   '/timesheets/pay-periods/': typeof TimesheetsPayPeriodsIndexRoute
-  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpRouteWithChildren
+  '/timesheets/pay-periods/$year/$pp': typeof TimesheetsPayPeriodsYearPpRouteRouteWithChildren
   '/timesheets/pay-periods/$year/': typeof TimesheetsPayPeriodsYearIndexRoute
   '/timesheets/pay-periods/$year/$pp/$date': typeof TimesheetsPayPeriodsYearPpDateRoute
+  '/timesheets/pay-periods/$year/$pp/': typeof TimesheetsPayPeriodsYearPpIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/timesheets/pay-periods/$year/$pp'
     | '/timesheets/pay-periods/$year/'
     | '/timesheets/pay-periods/$year/$pp/$date'
+    | '/timesheets/pay-periods/$year/$pp/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -206,9 +216,9 @@ export interface FileRouteTypes {
     | '/employee-portal'
     | '/timesheets'
     | '/timesheets/pay-periods'
-    | '/timesheets/pay-periods/$year/$pp'
     | '/timesheets/pay-periods/$year'
     | '/timesheets/pay-periods/$year/$pp/$date'
+    | '/timesheets/pay-periods/$year/$pp'
   id:
     | '__root__'
     | '/(app)'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/timesheets/pay-periods/$year/$pp'
     | '/timesheets/pay-periods/$year/'
     | '/timesheets/pay-periods/$year/$pp/$date'
+    | '/timesheets/pay-periods/$year/$pp/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -356,15 +367,22 @@ declare module '@tanstack/react-router' {
       id: '/timesheets/pay-periods/$year/$pp'
       path: '/$pp'
       fullPath: '/timesheets/pay-periods/$year/$pp'
-      preLoaderRoute: typeof TimesheetsPayPeriodsYearPpRouteImport
+      preLoaderRoute: typeof TimesheetsPayPeriodsYearPpRouteRouteImport
       parentRoute: typeof TimesheetsPayPeriodsYearRouteRoute
+    }
+    '/timesheets/pay-periods/$year/$pp/': {
+      id: '/timesheets/pay-periods/$year/$pp/'
+      path: '/'
+      fullPath: '/timesheets/pay-periods/$year/$pp/'
+      preLoaderRoute: typeof TimesheetsPayPeriodsYearPpIndexRouteImport
+      parentRoute: typeof TimesheetsPayPeriodsYearPpRouteRoute
     }
     '/timesheets/pay-periods/$year/$pp/$date': {
       id: '/timesheets/pay-periods/$year/$pp/$date'
       path: '/$date'
       fullPath: '/timesheets/pay-periods/$year/$pp/$date'
       preLoaderRoute: typeof TimesheetsPayPeriodsYearPpDateRouteImport
-      parentRoute: typeof TimesheetsPayPeriodsYearPpRoute
+      parentRoute: typeof TimesheetsPayPeriodsYearPpRouteRoute
     }
   }
 }
@@ -408,29 +426,31 @@ const EmployeePortalRouteRouteChildren: EmployeePortalRouteRouteChildren = {
 const EmployeePortalRouteRouteWithChildren =
   EmployeePortalRouteRoute._addFileChildren(EmployeePortalRouteRouteChildren)
 
-interface TimesheetsPayPeriodsYearPpRouteChildren {
+interface TimesheetsPayPeriodsYearPpRouteRouteChildren {
   TimesheetsPayPeriodsYearPpDateRoute: typeof TimesheetsPayPeriodsYearPpDateRoute
+  TimesheetsPayPeriodsYearPpIndexRoute: typeof TimesheetsPayPeriodsYearPpIndexRoute
 }
 
-const TimesheetsPayPeriodsYearPpRouteChildren: TimesheetsPayPeriodsYearPpRouteChildren =
+const TimesheetsPayPeriodsYearPpRouteRouteChildren: TimesheetsPayPeriodsYearPpRouteRouteChildren =
   {
     TimesheetsPayPeriodsYearPpDateRoute: TimesheetsPayPeriodsYearPpDateRoute,
+    TimesheetsPayPeriodsYearPpIndexRoute: TimesheetsPayPeriodsYearPpIndexRoute,
   }
 
-const TimesheetsPayPeriodsYearPpRouteWithChildren =
-  TimesheetsPayPeriodsYearPpRoute._addFileChildren(
-    TimesheetsPayPeriodsYearPpRouteChildren,
+const TimesheetsPayPeriodsYearPpRouteRouteWithChildren =
+  TimesheetsPayPeriodsYearPpRouteRoute._addFileChildren(
+    TimesheetsPayPeriodsYearPpRouteRouteChildren,
   )
 
 interface TimesheetsPayPeriodsYearRouteRouteChildren {
-  TimesheetsPayPeriodsYearPpRoute: typeof TimesheetsPayPeriodsYearPpRouteWithChildren
+  TimesheetsPayPeriodsYearPpRouteRoute: typeof TimesheetsPayPeriodsYearPpRouteRouteWithChildren
   TimesheetsPayPeriodsYearIndexRoute: typeof TimesheetsPayPeriodsYearIndexRoute
 }
 
 const TimesheetsPayPeriodsYearRouteRouteChildren: TimesheetsPayPeriodsYearRouteRouteChildren =
   {
-    TimesheetsPayPeriodsYearPpRoute:
-      TimesheetsPayPeriodsYearPpRouteWithChildren,
+    TimesheetsPayPeriodsYearPpRouteRoute:
+      TimesheetsPayPeriodsYearPpRouteRouteWithChildren,
     TimesheetsPayPeriodsYearIndexRoute: TimesheetsPayPeriodsYearIndexRoute,
   }
 
