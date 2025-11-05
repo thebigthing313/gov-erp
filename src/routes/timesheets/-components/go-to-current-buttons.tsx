@@ -1,9 +1,22 @@
 import { Button } from '@/components/ui/button'
 import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrentTimesheetInfo } from '@/db/hooks/use-current-timesheet-info'
 import { Link } from '@tanstack/react-router'
+import { Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 
 export function GoToCurrentButtons() {
+  return (
+    <ErrorBoundary fallback={<GoToCurrentButtonError />}>
+      <Suspense fallback={<GoToCurrentButtonLoading />}>
+        <GoToCurrentButtonBuilder />
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+
+function GoToCurrentButtonBuilder() {
   const { current_pay_period, current_payroll_year, current_timesheet } =
     useCurrentTimesheetInfo()
   const isYearAvailable = current_payroll_year !== undefined
@@ -56,6 +69,32 @@ export function GoToCurrentButtons() {
           'Timesheet'
         )}
       </Button>
+    </ButtonGroup>
+  )
+}
+
+function GoToCurrentButtonLoading() {
+  return (
+    <ButtonGroup>
+      <ButtonGroupText>Go to Current:</ButtonGroupText>
+      <Button className="w-6" variant="outline" disabled>
+        <Skeleton className="w-full" />
+      </Button>
+      <Button className="w-6" variant="outline" disabled>
+        <Skeleton className="w-full" />
+      </Button>
+      <Button className="w-6" variant="outline" disabled>
+        <Skeleton className="w-full" />
+      </Button>
+    </ButtonGroup>
+  )
+}
+
+function GoToCurrentButtonError() {
+  return (
+    <ButtonGroup>
+      <ButtonGroupText>Go to Current:</ButtonGroupText>
+      <ButtonGroupText>Error loading current data...</ButtonGroupText>
     </ButtonGroup>
   )
 }
