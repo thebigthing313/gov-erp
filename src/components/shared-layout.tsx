@@ -56,31 +56,38 @@ export function SharedLayoutOutlet({
   return <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
 }
 
-interface SharedLayoutSidebarProps {
-  employee_id: string
-  children?: React.ReactNode
+function UserButton({ employee_id }: { employee_id: string }) {
+  const employee = useEmployee(employee_id)
+  const { data: employee_titles } = useEmployeeTitles(employee_id)
+
+  const currentTitle = employee_titles[0]
+
+  return (
+    <>
+      <Avatar>
+        <AvatarImage
+          src={employee.photo_url || undefined}
+          alt="Employee Avatar"
+        />
+        <AvatarFallback>{employee.first_name.charAt(0)}</AvatarFallback>
+      </Avatar>
+      <div className="grid gap-0">
+        <span className="truncate font-medium">{`${employee.first_name} ${employee.last_name}`}</span>
+        <span className="text-muted-foreground">
+          {currentTitle.title.title_name}
+        </span>
+      </div>
+    </>
+  )
 }
 
 export function SharedLayoutSidebar({
   employee_id,
   children,
-}: SharedLayoutSidebarProps) {
+}: React.ComponentPropsWithRef<typeof SidebarContent> & {
+  employee_id: string
+}) {
   const navigate = useNavigate()
-  const {
-    data: employee,
-    isLoading: isLoadingEmployee,
-    isError: isErrorEmployee,
-  } = useEmployee(employee_id)
-  const {
-    data: employee_titles,
-    isLoading: isLoadingEmployeeTitles,
-    isError: isErrorEmployeeTitles,
-  } = useEmployeeTitles(employee_id)
-  if (isLoadingEmployee || isLoadingEmployeeTitles) return <div>Loading...</div>
-  if (isErrorEmployee || isErrorEmployeeTitles || !employee || !employee_titles)
-    return <div>Error loading employee data.</div>
-
-  const currentTitle = employee_titles[0]
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -92,19 +99,7 @@ export function SharedLayoutSidebar({
               tooltip="My Profile"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar>
-                <AvatarImage
-                  src={employee.photo_url || undefined}
-                  alt="Employee Avatar"
-                />
-                <AvatarFallback>{employee.first_name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-0">
-                <span className="truncate font-medium">{`${employee.first_name} ${employee.last_name}`}</span>
-                <span className="text-muted-foreground">
-                  {currentTitle.title.title_name}
-                </span>
-              </div>
+              <UserButton employee_id={employee_id} />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
