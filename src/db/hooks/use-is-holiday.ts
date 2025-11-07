@@ -14,6 +14,7 @@ export function useIsHoliday(date: Date) {
                 .where(({ holiday_date }) =>
                     eq(holiday_date.holiday_date, date)
                 ).select(({ holiday }) => ({ name: holiday.name })),
+        [date],
     );
 
     const holiday = data.length !== 0 ? data[0].name : undefined;
