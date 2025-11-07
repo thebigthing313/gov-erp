@@ -1,86 +1,135 @@
-// import { createCollection } from "@tanstack/react-db";
-// import * as TanstackQueryProvider from "@/integrations/tanstack-query/root-provider";
-// import { queryCollectionOptions } from "@tanstack/query-db-collection";
-// import { Table, Timesheet } from "../data-types";
-// import { supabase } from "../client";
-// import { Tables } from "../supabase-types";
-// import { transformDatesDBtoApp } from "../utils";
-// import {
-//     collectionOnDelete,
-//     collectionOnInsert,
-//     collectionOnUpdate,
-// } from "../collection-functions";
-
-import { Collection } from "@tanstack/react-db";
+import { createCollection } from '@tanstack/react-db'
+import { queryCollectionOptions } from '@tanstack/query-db-collection'
+import * as TanstackQueryProvider from '@/integrations/tanstack-query/root-provider'
 import {
-    ZodTimesheetsInsertToDb,
-    ZodTimesheetsInsertType,
-    ZodTimesheetsRow,
-    ZodTimesheetsRowType,
-    ZodTimesheetsUpdateToDb,
-    ZodTimesheetsUpdateType,
-} from "../schemas/timesheets";
-import { Table } from "../data-types";
-import { createParameterizedSupabaseCollectionFactory } from "./collection-factory";
-import { supabase } from "../client";
+  ZodTimesheetsInsertToDb,
+  ZodTimesheetsRow,
+  ZodTimesheetsUpdateToDb,
+} from '../schemas/timesheets'
+import { supabase } from '../client'
 
-const cache = new Map<
-    number,
-    Collection<ZodTimesheetsRowType, string | number>
->();
-const table: Table = "timesheets";
+const { queryClient } = TanstackQueryProvider.getContext()
+const table = 'timesheets'
 
-const timesheetsCollectionFactory =
-    createParameterizedSupabaseCollectionFactory<
-        [year: number],
-        ZodTimesheetsRowType,
-        ZodTimesheetsInsertType,
-        ZodTimesheetsUpdateType
-    >(
-        table,
-        {
-            rowSchema: ZodTimesheetsRow,
-            insertSchema: ZodTimesheetsInsertToDb,
-            updateSchema: ZodTimesheetsUpdateToDb,
-        },
-        async (year) => {
-            const { data, error } = await supabase.from(table).select(
-                "*, pay_periods!inner(payroll_year)",
-            ).eq(
-                "pay_periods.payroll_year",
-                year,
-            );
-            if (error) throw error;
+const cache = new Map<string, ReturnType<typeof timesheets_factory>>()
 
-            const strippedData = data.map(
-                (item) => {
-                    const { pay_periods, ...rest } = item;
-                    return rest;
-                },
-            );
+export const timesheets = (pay_period_id: string) => {
+  let collection = cache.get(pay_period_id)
+  if (!collection) {
+    collection = timesheets_factory(pay_period_id)
 
-            const parsedData = strippedData.map((item) =>
-                ZodTimesheetsRow.parse(item)
-            );
+    collection.on('status:change', ({ status }) => {
+      if (status === 'cleaned-up') {
+        cache.delete(pay_period_id)
+      }
+    })
 
-            return parsedData as Array<ZodTimesheetsRowType>;
-        },
-        {
-            staleTime: 1000 * 60 * 60, // 1 hour
-        },
-    );
+    cache.set(pay_period_id, collection)
+  }
+  return collection
+}
 
-export const timesheets = (year: number) => {
-    let collection = cache.get(year);
-    if (!collection) {
-        collection = timesheetsCollectionFactory(year);
-        collection.on("status:change", ({ status }) => {
-            if (status === "cleaned-up") {
-                cache.delete(year);
-            }
-        });
+export const timesheets_factory = (pay_period_id: string) =>
+  createCollection(
+    queryCollectionOptions({
+      queryKey: [table, pay_period_id],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from(table)
+          .select('*')
+          .eq('pay_period_id', pay_period_id)
+        if (error) {
+          throw new Error(`Error fetching table <${table}>: ${error.message}`)
+        }
+        const parsed = data.map((item) => ZodTimesheetsRow.parse(item))
+        return parsed
+      },
+      queryClient,
+      schema: ZodTimesheetsRow,
+      getKey: (item) => item.id,
+      onInsert: async ({ transaction, collection }) => {
+        const localNewItems = transaction.mutations.map((m) => m.modified)
 
-        cache.set(year, collection);
-    }
-    return collection;
-};
+        const parsedLocalNewItems = localNewItems.map((item) =>
+          ZodTimesheetsInsertToDb.parse(item),
+        )
+
+        const { data, error } = await supabase
+          .from(table)
+          .insert(parsedLocalNewItems)
+          .select('*')
+
+        if (error) {
+          throw new Error(
+            `Error inserting into table <${table}>: ${error.message}`,
+          )
+        }
+
+        const parsedServerNewItems = data.map((item) =>
+          ZodTimesheetsRow.parse(item),
+        )
+
+        collection.utils.writeBatch(() => {
+          parsedServerNewItems.forEach((item) =>
+            collection.utils.writeUpsert(item),
+          )
+        })
+
+        return { refetch: false }
+      },
+      onUpdate: async ({ transaction, collection }) => {
+        if (transaction.mutations.length === 0) {
+          return { refetch: false }
+        }
+
+        const localUpdatedKeys = transaction.mutations.map((m) => m.key)
+
+        const localChangesToApply = transaction.mutations[0].changes
+
+        const parsedChangesToApply =
+          ZodTimesheetsUpdateToDb.parse(localChangesToApply)
+
+        const { data, error } = await supabase
+          .from(table)
+          .update(parsedChangesToApply)
+          .in('id', localUpdatedKeys)
+          .select('*')
+
+        if (error) {
+          throw new Error(`Error updating table <${table}>: ${error.message}`)
+        }
+
+        const parsedServerUpdatedItems = data.map((item) =>
+          ZodTimesheetsRow.parse(item),
+        )
+
+        collection.utils.writeBatch(() => {
+          parsedServerUpdatedItems.forEach((item) =>
+            collection.utils.writeUpsert(item),
+          )
+        })
+
+        return { refetch: false }
+      },
+      onDelete: async ({ transaction, collection }) => {
+        const localDeletedItemIds = transaction.mutations.map((m) => m.key)
+
+        const { error: deleteError } = await supabase
+          .from(table)
+          .delete()
+          .in('id', localDeletedItemIds)
+
+        if (deleteError) {
+          throw new Error(
+            `Error deleting from table <${table}>: ${deleteError.message}`,
+          )
+        }
+
+        collection.utils.writeBatch(() => {
+          localDeletedItemIds.forEach((id) => collection.utils.writeDelete(id))
+        })
+
+        return { refetch: false }
+      },
+    }),
+  )
