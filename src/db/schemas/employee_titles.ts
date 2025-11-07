@@ -1,5 +1,5 @@
 // Auto-generated schema file for employee_titles table
-// Generated on: 2025-10-29T21:08:09.737Z
+// Generated on: 2025-11-07T20:50:43.517Z
 //
 // IMPORTANT: Automatic preprocessing is enabled for date fields:
 // - Fields ending in '_at' (timestamps): ISO strings are automatically converted to Date objects
@@ -20,7 +20,7 @@ export const ZodEmployeeTitlesRow = z.object({
 	modified_by: z.uuid().nullable().optional(),
 	start_date: z.preprocess((val) => typeof val === "string" ? new Date(val.includes("T") ? val : `${val}T00:00:00Z`) : val, z.date()),
 	title_id: z.uuid(),
-	title_status: z.string(),
+	title_status: z.enum(["permanent", "part-time", "seasonal", "provisional", "volunteer"]),
 });
 
 export const ZodEmployeeTitlesInsert = z.object({
@@ -29,7 +29,7 @@ export const ZodEmployeeTitlesInsert = z.object({
 	id: z.uuid().optional(),
 	start_date: z.preprocess((val) => typeof val === "string" ? new Date(val.includes("T") ? val : `${val}T00:00:00Z`) : val, z.date()),
 	title_id: z.uuid(),
-	title_status: z.string(),
+	title_status: z.enum(["permanent", "part-time", "seasonal", "provisional", "volunteer"]),
 });
 
 export const ZodEmployeeTitlesUpdate = ZodEmployeeTitlesInsert.partial();
@@ -45,7 +45,7 @@ export const ZodEmployeeTitlesRowToDb = z.object({
 	modified_by: z.uuid().nullable().optional(),
 	start_date: z.preprocess((val) => val instanceof Date ? val.toISOString().split("T")[0] : val, z.string()),
 	title_id: z.uuid(),
-	title_status: z.string(),
+	title_status: z.enum(["permanent", "part-time", "seasonal", "provisional", "volunteer"]),
 });
 
 export const ZodEmployeeTitlesInsertToDb = z.object({
@@ -54,7 +54,7 @@ export const ZodEmployeeTitlesInsertToDb = z.object({
 	id: z.uuid().optional(),
 	start_date: z.preprocess((val) => val instanceof Date ? val.toISOString().split("T")[0] : val, z.string()),
 	title_id: z.uuid(),
-	title_status: z.string(),
+	title_status: z.enum(["permanent", "part-time", "seasonal", "provisional", "volunteer"]),
 });
 
 export const ZodEmployeeTitlesUpdateToDb = ZodEmployeeTitlesInsertToDb.partial();
