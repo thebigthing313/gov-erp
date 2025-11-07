@@ -1,25 +1,25 @@
-import { createSupabaseCollection } from "./collection-factory";
+import { createSupabaseCollection } from './collection-factory'
 import {
-    ZodTimeTypesInsertToDb,
-    ZodTimeTypesInsertToDbType,
-    ZodTimeTypesRow,
-    ZodTimeTypesRowType,
-    ZodTimeTypesUpdateToDb,
-    ZodTimeTypesUpdateToDbType,
-} from "../schemas/time_types";
+  ZodTimeTypesInsertToDb,
+  ZodTimeTypesInsertToDbType,
+  ZodTimeTypesRow,
+  ZodTimeTypesRowType,
+  ZodTimeTypesUpdateToDb,
+  ZodTimeTypesUpdateToDbType,
+} from '../schemas/time_types'
 
-export const TimeTypes = createSupabaseCollection<
-    ZodTimeTypesRowType,
-    ZodTimeTypesInsertToDbType,
-    ZodTimeTypesUpdateToDbType
+export const time_types = createSupabaseCollection<
+  ZodTimeTypesRowType,
+  ZodTimeTypesInsertToDbType,
+  ZodTimeTypesUpdateToDbType
 >(
-    "time_types",
-    {
-        rowSchema: ZodTimeTypesRow,
-        insertSchema: ZodTimeTypesInsertToDb,
-        updateSchema: ZodTimeTypesUpdateToDb,
-    },
-    {
-        staleTime: 1000 * 60 * 60,
-    },
-);
+  'time_types',
+  {
+    rowSchema: ZodTimeTypesRow,
+    insertSchema: ZodTimeTypesInsertToDb,
+    updateSchema: ZodTimeTypesUpdateToDb,
+  },
+  {
+    staleTime: 1000 * 60 * 60,
+  },
+)
