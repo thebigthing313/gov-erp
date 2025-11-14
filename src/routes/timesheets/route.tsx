@@ -7,8 +7,12 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Auth, getAuth, hasPermission, isAuthenticated } from '@/lib/auth'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { TimesheetsSidebarContent } from './-components/sidebar-contents'
-import { Spinner } from '@/components/ui/spinner'
 import { SharedBreadcrumb } from '@/components/shared-breadcrumb'
+import { pay_periods } from '@/db/collections/pay-periods'
+import { titles } from '@/db/collections/titles'
+import { employees } from '@/db/collections/employees'
+import { holidays } from '@/db/collections/holidays'
+import { holiday_dates } from '@/db/collections/holiday-dates'
 
 export const Route = createFileRoute('/timesheets')({
   beforeLoad: async () => {
@@ -26,9 +30,13 @@ export const Route = createFileRoute('/timesheets')({
 
     return { auth: auth as Auth }
   },
-  pendingComponent: () => <Spinner />,
   component: RouteComponent,
   loader: () => {
+    pay_periods.preload()
+    titles.preload()
+    employees.preload()
+    holidays.preload()
+    holiday_dates.preload()
     return { crumb: 'Timesheet Program' }
   },
 })
