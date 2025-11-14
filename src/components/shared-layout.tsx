@@ -17,7 +17,11 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { useNavigate } from '@tanstack/react-router'
 import { signOut } from '@/lib/auth'
 import { useEmployee } from '@/db/hooks/use-employee'
-import { useEmployeeTitles } from '@/db/hooks/use-employee-titles'
+import { useCurrentEmployeeTitle } from '@/db/hooks/use-employee-titles'
+import { Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
+import { Spinner } from './ui/spinner'
+import { UserButton } from './user-button'
 
 export function SharedLayout({
   children,
@@ -56,31 +60,6 @@ export function SharedLayoutOutlet({
   return <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
 }
 
-function UserButton({ employee_id }: { employee_id: string }) {
-  const employee = useEmployee(employee_id)
-  const { data: employee_titles } = useEmployeeTitles(employee_id)
-
-  const currentTitle = employee_titles[0]
-
-  return (
-    <>
-      <Avatar>
-        <AvatarImage
-          src={employee.photo_url || undefined}
-          alt="Employee Avatar"
-        />
-        <AvatarFallback>{employee.first_name.charAt(0)}</AvatarFallback>
-      </Avatar>
-      <div className="grid gap-0">
-        <span className="truncate font-medium">{`${employee.first_name} ${employee.last_name}`}</span>
-        <span className="text-muted-foreground">
-          {currentTitle.title.title_name}
-        </span>
-      </div>
-    </>
-  )
-}
-
 export function SharedLayoutSidebar({
   employee_id,
   children,
@@ -99,7 +78,11 @@ export function SharedLayoutSidebar({
               tooltip="My Profile"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <UserButton employee_id={employee_id} />
+              <ErrorBoundary fallback={<div>Error loading user</div>}>
+                <Suspense fallback={<Spinner />}>
+                  <UserButton employee_id={employee_id} />
+                </Suspense>
+              </ErrorBoundary>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
