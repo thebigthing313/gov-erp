@@ -18,9 +18,12 @@ export const timesheets = createCollection(
       const parsed = parseLoadSubsetOptions(opts)
       const cacheKey = [table]
       parsed.filters.forEach((filter) => {
-        cacheKey.push(
-          `${filter.field.join('.')}-${filter.operator}-${filter.value}`,
-        )
+        const fieldPath = filter.field.join('.')
+        let filterValue = filter.value
+        if (fieldPath.slice(-5) === '_date') {
+          filterValue = filter.value.toISOString().slice(0, 10)
+        }
+        cacheKey.push(`${fieldPath}-${filter.operator}-${filterValue}`)
       })
 
       if (parsed.limit) {
@@ -32,6 +35,7 @@ export const timesheets = createCollection(
     queryClient,
     schema: ZodTimesheetsRow,
     getKey: (item) => item.id,
+    staleTime: 1000 * 60 * 10,
     syncMode: 'on-demand',
     queryFn: async (ctx) => {
       let query = supabase.from(table).select('*')
@@ -42,25 +46,30 @@ export const timesheets = createCollection(
       )
 
       filters.forEach(({ field, operator, value }) => {
+        let filterValue = value
         const fieldPath = field.join('.')
+        if (fieldPath.slice(-5) === '_date') {
+          filterValue = value.toISOString().slice(0, 10)
+        }
+
         switch (operator) {
           case 'eq':
-            query = query.eq(fieldPath, value)
+            query = query.eq(fieldPath, filterValue)
             break
           case 'lt':
-            query = query.lt(fieldPath, value)
+            query = query.lt(fieldPath, filterValue)
             break
           case 'lte':
-            query = query.lte(fieldPath, value)
+            query = query.lte(fieldPath, filterValue)
             break
           case 'gt':
-            query = query.gt(fieldPath, value)
+            query = query.gt(fieldPath, filterValue)
             break
           case 'gte':
-            query = query.gte(fieldPath, value)
+            query = query.gte(fieldPath, filterValue)
             break
           case 'in':
-            query = query.in(fieldPath, value)
+            query = query.in(fieldPath, filterValue)
             break
         }
       })
