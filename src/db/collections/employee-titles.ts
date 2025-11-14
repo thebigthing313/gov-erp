@@ -33,6 +33,7 @@ export const employee_titles = createCollection(
     schema: ZodEmployeeTitlesRow,
     getKey: (item) => item.id,
     syncMode: 'on-demand',
+    staleTime: 1000 * 60 * 60,
     queryFn: async (ctx) => {
       let query = supabase.from(table).select('*')
 
