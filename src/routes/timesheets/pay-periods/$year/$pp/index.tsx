@@ -11,8 +11,8 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { timesheets } from '@/db/collections/timesheets'
 import { useIsHoliday } from '@/db/hooks/use-is-holiday'
-import { usePayPeriod } from '@/db/hooks/use-pay-period'
-import { useTimesheet } from '@/db/hooks/use-timesheet'
+import { getDatesArray, usePayPeriod } from '@/db/hooks/use-pay-period'
+import { useTimesheets } from '@/db/hooks/use-timesheets'
 import { ZodTimesheetsRowType } from '@/db/schemas/timesheets'
 import { formatDate } from '@/lib/date-fns'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
@@ -33,28 +33,24 @@ export const Route = createFileRoute('/timesheets/pay-periods/$year/$pp/')({
 function RouteComponent() {
   const { year, pp } = Route.useParams()
   const { data: pay_period } = usePayPeriod(year, pp)
-  type PayPeriod = typeof pay_period
+  const { data: timesheets_for_period } = useTimesheets(pay_period.id)
+  const datesThatExist = timesheets_for_period.map((ts) => ts.timesheet_date)
 
-  function getDates(pay_period: PayPeriod | null | undefined): Date[] {
-    if (!pay_period) return []
-
-    const current = new Date(pay_period.begin_date)
-    const end = pay_period.end_date
-    const result: Date[] = []
-
-    while (current <= end) {
-      result.push(new Date(current))
-      current.setUTCDate(current.getUTCDate() + 1)
-    }
-
-    return result
+  if (!pay_period) {
+    return <div>Pay period not found.</div>
   }
 
-  const dates = getDates(pay_period)
+  const startDate = new Date(pay_period.begin_date)
+  const endDate = new Date(pay_period.end_date)
+
+  const dates = getDatesArray(startDate, endDate)
 
   return (
     <ItemGroup className="grid grid-rows-7 grid-flow-col w-fit">
       {dates.map((date) => {
+        const exists = datesThatExist.some(
+          (existingDate) => existingDate.getTime() === date.getTime(),
+        )
         return (
           <Item className="w-sm" key={date.toISOString()} variant="outline">
             <ItemContent>
@@ -72,7 +68,11 @@ function RouteComponent() {
               </ItemDescription>
             </ItemContent>
             <ItemActions>
-              <TimesheetButton date={date} />
+              {exists ? (
+                <OpenTimesheetButton date={date} />
+              ) : (
+                <CreateTimesheetButton date={date} />
+              )}
             </ItemActions>
           </Item>
         )
@@ -94,16 +94,29 @@ function TimesheetHolidayBadge({ date }: { date: Date }) {
   else return null
 }
 
-function TimesheetButton({ date }: { date: Date }) {
+function OpenTimesheetButton({ date }: { date: Date }) {
+  const isoDateString = date.toISOString().substring(0, 10)
+
+  return (
+    <Button variant="default" asChild>
+      <Link
+        from="/timesheets/pay-periods/$year/$pp/"
+        to="./$date"
+        params={{ date: isoDateString }}
+      >
+        Open
+      </Link>
+    </Button>
+  )
+}
+
+function CreateTimesheetButton({ date }: { date: Date }) {
   const { year, pp } = Route.useParams()
   const { data: pay_period } = usePayPeriod(year, pp)
-  const { data: timesheet } = useTimesheet(date)
   const navigate = useNavigate()
   const isoDateString = date.toISOString().substring(0, 10)
 
   function handleCreate() {
-    const timesheets_by_year = timesheets(year)
-
     if (!pay_period) {
       toast.error('Unable to retrieve pay period ID.')
       return
@@ -116,7 +129,7 @@ function TimesheetButton({ date }: { date: Date }) {
       notes: null,
     }
 
-    timesheets_by_year.insert(row)
+    timesheets.insert(row)
     navigate({
       from: '/timesheets/pay-periods/$year/$pp/',
       to: './$date',
@@ -124,28 +137,14 @@ function TimesheetButton({ date }: { date: Date }) {
     })
   }
 
-  if (timesheet) {
-    return (
-      <Button variant="default" asChild>
-        <Link
-          from="/timesheets/pay-periods/$year/$pp/"
-          to="./$date"
-          params={{ date: isoDateString }}
-        >
-          Open
-        </Link>
-      </Button>
-    )
-  } else {
-    return (
-      <Button
-        variant="secondary"
-        onClick={() => {
-          handleCreate()
-        }}
-      >
-        Create
-      </Button>
-    )
-  }
+  return (
+    <Button
+      variant="secondary"
+      onClick={() => {
+        handleCreate()
+      }}
+    >
+      Create
+    </Button>
+  )
 }
