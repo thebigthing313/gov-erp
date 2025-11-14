@@ -1,6 +1,7 @@
 import {
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -28,6 +29,7 @@ const sidebarItems: Array<SidebarItem> = [
 export function EmployeePortalSidebarContent() {
   return (
     <SidebarGroup>
+      <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {sidebarItems.map((item) => (
