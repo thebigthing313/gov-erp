@@ -22,10 +22,13 @@ interface UserButtonBuilderProps {
   employee_id: string
 }
 function UserButtonBuilder({ employee_id }: UserButtonBuilderProps) {
-  const employee = useEmployee(employee_id)
+  const { data: employee } = useEmployee(employee_id)
   const { data: employee_titles } = useEmployeeTitles(employee_id)
 
-  const currentTitle = employee_titles[0]
+  const current_title = employee_titles[0]
+  const displayTitle = current_title
+    ? current_title.title.title_name
+    : 'No Titles Found'
 
   return (
     <>
@@ -38,9 +41,7 @@ function UserButtonBuilder({ employee_id }: UserButtonBuilderProps) {
       </Avatar>
       <div className="grid gap-0">
         <span className="truncate font-medium">{`${employee.first_name} ${employee.last_name}`}</span>
-        <span className="text-muted-foreground">
-          {currentTitle.title.title_name}
-        </span>
+        <span className="text-muted-foreground">{displayTitle}</span>
       </div>
     </>
   )
