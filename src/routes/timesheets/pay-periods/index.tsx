@@ -2,7 +2,6 @@ import { RenderTable } from '@/components/render-table'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
-import { usePayrollYears } from '@/db/hooks/use-payroll-years'
 import { formatDate } from '@/lib/date-fns'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import {
@@ -13,8 +12,10 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { BookOpen } from 'lucide-react'
+import { useLiveSuspenseQuery, min, max, count } from '@tanstack/react-db'
 import { Suspense, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
+import { pay_periods } from '@/db/collections/pay-periods'
 
 export const Route = createFileRoute('/timesheets/pay-periods/')({
   component: () => (
@@ -123,7 +124,20 @@ const columns = [
 ]
 
 function RouteComponent() {
-  const { data: payroll_years } = usePayrollYears()
+  const { data: payroll_years } = useLiveSuspenseQuery((q) =>
+    q
+      .from({ pay_period: pay_periods })
+      .groupBy(({ pay_period }) => pay_period.payroll_year)
+      .select(({ pay_period }) => ({
+        year: pay_period.payroll_year,
+        start_date: min(pay_period.begin_date),
+        end_date: max(pay_period.end_date),
+        first_pay_date: min(pay_period.pay_date),
+        last_pay_date: max(pay_period.pay_date),
+        pay_period_count: count(pay_period.id),
+      }))
+      .orderBy(({ pay_period }) => pay_period.payroll_year, 'desc'),
+  )
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'year', desc: true },
   ])
