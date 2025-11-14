@@ -24,6 +24,7 @@ export const pay_periods = createCollection(
     },
     queryClient,
     schema: ZodPayPeriodsRow,
+    staleTime: Infinity,
     getKey: (item) => item.id,
     onInsert: async ({ transaction, collection }) => {
       const localNewItems = transaction.mutations.map((m) => m.modified)

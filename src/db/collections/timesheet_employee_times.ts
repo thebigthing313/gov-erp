@@ -11,7 +11,7 @@ import {
 const { queryClient } = TanstackQueryProvider.getContext()
 const table = 'timesheet_employee_times'
 
-export const timesheets = createCollection(
+export const timesheet_employee_times = createCollection(
   queryCollectionOptions({
     id: table,
     queryKey: (opts) => {
@@ -33,6 +33,7 @@ export const timesheets = createCollection(
     schema: ZodTimesheetEmployeeTimesRow,
     getKey: (item) => item.id,
     syncMode: 'on-demand',
+    staleTime: 1000 * 60 * 10,
     queryFn: async (ctx) => {
       let query = supabase.from(table).select('*')
 

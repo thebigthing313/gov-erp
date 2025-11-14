@@ -24,6 +24,7 @@ export const time_types = createCollection(
     },
     queryClient,
     schema: ZodTimeTypesRow,
+    staleTime: Infinity,
     getKey: (item) => item.id,
     onInsert: async ({ transaction, collection }) => {
       const localNewItems = transaction.mutations.map((m) => m.modified)
