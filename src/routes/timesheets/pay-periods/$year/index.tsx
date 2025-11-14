@@ -1,4 +1,3 @@
-import { usePayPeriods } from '@/db/hooks/use-pay-periods'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import z from 'zod'
 import {
@@ -13,10 +12,11 @@ import { formatDate } from '@/lib/date-fns'
 import { Suspense, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Spinner } from '@/components/ui/spinner'
-import { useLiveSuspenseQuery } from '@tanstack/react-db'
+import { eq, useLiveSuspenseQuery } from '@tanstack/react-db'
 import { RenderTable } from '@/components/render-table'
 import { Button } from '@/components/ui/button'
 import { BookOpen } from 'lucide-react'
+import { pay_periods } from '@/db/collections/pay-periods'
 
 const RouteParam = z.object({
   year: z.coerce.number(),
@@ -102,18 +102,19 @@ const columns = [
 
 function RouteComponent() {
   const { year } = Route.useParams()
-  const { collection } = usePayPeriods(year)
-
   const { data: pay_periods_by_year } = useLiveSuspenseQuery(
     (q) =>
-      q.from({ pay_period: collection }).select(({ pay_period }) => {
-        return {
-          pp_number: pay_period.pay_period_number,
-          start_date: pay_period.begin_date,
-          end_date: pay_period.end_date,
-          pay_date: pay_period.pay_date,
-        }
-      }),
+      q
+        .from({ pay_period: pay_periods })
+        .where(({ pay_period }) => eq(pay_period.payroll_year, year))
+        .select(({ pay_period }) => {
+          return {
+            pp_number: pay_period.pay_period_number,
+            start_date: pay_period.begin_date,
+            end_date: pay_period.end_date,
+            pay_date: pay_period.pay_date,
+          }
+        }),
     [year],
   )
 
