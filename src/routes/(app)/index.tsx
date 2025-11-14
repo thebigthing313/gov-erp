@@ -27,7 +27,7 @@ export const Route = createFileRoute('/(app)/')({
 
 function RouteComponent() {
   const { company, auth } = Route.useRouteContext()
-  const employee = useEmployee(auth.employeeId)
+  const { data: employee } = useEmployee(auth.employeeId)
   const navigate = useNavigate()
 
   const parsedPhone = parsePhoneNumberWithError(company.phone, {
